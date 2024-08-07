@@ -19,6 +19,7 @@
     "express-session": "^1.18.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.2",
-    "mongoose-unique-validator": "^5.0.1"
+    "mongoose-unique-validator": "^5.0.1",
+    "validator": "^13.12.0"
   }
 }
