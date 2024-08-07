@@ -6,4 +6,8 @@ const router = express.Router();
 
 router.use(isAuthenticatedGlobal);
 
+router.route('/profile').get(clientController.userProfile);
+
+router.route('/accueil/search').post(clientController.accueilSearch);
+
 export {router};
