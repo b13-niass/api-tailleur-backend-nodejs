@@ -1,9 +1,9 @@
 import express from "express"
 import clientController from "../controller/ClientController.js";
-import {isClientAuthenticated} from "../middleware/authClient.js";
+import {isAuthenticatedGlobal} from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.use(isClientAuthenticated);
+router.use(isAuthenticatedGlobal);
 
 export {router};
