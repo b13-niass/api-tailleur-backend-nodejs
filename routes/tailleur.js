@@ -1,10 +1,10 @@
 import express from "express"
 import tailleurController from "../controller/TailleurController.js";
-import {isAuthenticated} from "../middleware/authTailleur.js";
+import {isTailleurAuthenticated} from "../middleware/authTailleur.js";
 
 const router = express.Router();
 
-router.use(isAuthenticated);
+router.use(isTailleurAuthenticated);
 
 router.route('/posts')
     .get(tailleurController.listMyAllPosts)

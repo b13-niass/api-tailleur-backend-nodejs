@@ -1,13 +1,11 @@
 import mongoose from "mongoose";
-import User from "./User";
+import { Schema } from "mongoose";
 
-const TailleurSchema = new mongoose.Schema({
-    user_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        required: [true, "L'ID utilisateur est requis"]
-    }
+// Tailleur Schema
+const TailleurSchema = new Schema({
+    compte_id: { type: Schema.Types.ObjectId, ref: 'Compte' },
+    status_ids: [{ type: Schema.Types.ObjectId, ref: 'Status' }],
+    post_ids: [{ type: Schema.Types.ObjectId, ref: 'Post' }]
 });
 
-export default mongoose.model("Tailleur", TailleurSchema);
-
+export default mongoose.model('Tailleur', TailleurSchema)

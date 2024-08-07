@@ -1,6 +1,4 @@
 import bcrypt from "bcryptjs";
-import crypto from "crypto"
-import jwt from "jsonwebtoken";
 
 export const hashPassword = async function (plainPassword) {
     try {
@@ -23,24 +21,4 @@ export const verifyPassword = async function (plainPassword, hashedPassword) {
     } catch (error) {
         console.error('Error verifying password:', error);
     }
-}
-
-export const generateSessionSecret = function () {
-    return crypto.randomBytes(64).toString('hex')
-}
-
-export const userInToken = (req, res) => {
-    // return res.json(req.headers);
-    const authHeader = req.headers.authorization
-    const token = authHeader && authHeader.split(' ')[1];
-    if (token == null) {
-        return res.status(401).json({ message: 'Token is required' });
-    }
-
-    return jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({message: 'Invalid token'});
-        }
-        return user;
-    });
 }

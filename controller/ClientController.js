@@ -1,6 +1,5 @@
-import Controller from "../core/controller/Controller.js";
 
-class ClientController extends Controller{
+class ClientController{
 
 }
 

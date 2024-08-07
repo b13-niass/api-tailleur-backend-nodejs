@@ -1,7 +1,6 @@
-import {userInToken} from "../utils/utils.js";
-import Controller from "../core/controller/Controller.js";
+// import {userInToken} from "../utils/utils.js";
 
-class TailleurController extends Controller{
+class TailleurController{
 
     listMyAllPosts(req, res) {
         try {
@@ -13,7 +12,7 @@ class TailleurController extends Controller{
 
     async createPost(req, res) {
         try {
-            const user = userInToken(req,res);
+            // const user = userInToken(req,res);
 
         } catch (err) {
             return res.status(500).json({message: err.message, status: 'KO'});

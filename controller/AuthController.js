@@ -1,14 +1,9 @@
 import jwt from "jsonwebtoken";
 
-import {verifyPassword, hashPassword} from "../utils/utils.js";
-import Controller from "../core/controller/Controller.js";
+import {verifyPassword, hashPassword} from "../utils/password.js";
 import User from "../model/User.js";
 
-class AuthController extends Controller{
-
-    constructor() {
-        super();
-    }
+class AuthController{
 
     async login(req, res) {
         try {
