@@ -1,6 +1,8 @@
 import Compte from "../model/Compte.js";
 import User from "../model/User.js";
 import Post from "../model/Post.js";
+import Comment from "../model/Comment.js";
+import CommentResponse from "../model/CommentResponse.js";
 
 class ClientController{
     async userProfile(req, res) {
@@ -60,6 +62,54 @@ class ClientController{
         return res.json({comptes, posts, message: 'Résultats de la recherche', status: 'OK'});
     }
 
+    async ajoutComment(req, res) {
+        const {content, idPost} = req.body;
+        const idCompte = req.id;
+
+        /**
+         * valider le content ici
+         */
+
+        const newComment = new Comment({
+            content,
+            compte_id: idCompte,
+            post_id: idPost,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+        await newComment.save();
+
+        return res.json({comment: newComment, message: 'Commentaire ajouté', status: 'OK'});
+
+    }
+
+    async reponseComment(req, res) {
+        const {content, idComment, idCompte} = req.body;
+
+        /**
+         * valider le content ici
+         */
+
+        const comment = await Comment.findByIdAndUpdate(idComment, {
+            $push: { commentResponse_ids: idCompte },
+            updatedAt: new Date()
+        }, { new: true });
+
+        if (!comment) {
+            return res.status(404).json({message: 'Commentaire non trouvé', status: 'KO'});
+        }
+
+        const newCommentResponse = new CommentResponse({
+            texte: content,
+            compte_id: idCompte,
+            comment_id: idComment,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        });
+        await newCommentResponse.save();
+
+        return res.json({commentResponse: newCommentResponse, message: 'Réponse ajoutée', status: 'OK'});
+    }
 }
 
 export default new ClientController();

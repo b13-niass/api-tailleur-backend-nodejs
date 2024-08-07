@@ -9,5 +9,7 @@ router.use(isAuthenticatedGlobal);
 router.route('/profile').get(clientController.userProfile);
 
 router.route('/accueil/search').post(clientController.accueilSearch);
+router.route('/posts/comment').post(clientController.ajoutComment);
+router.route('/posts/comment/reponse').post(clientController.reponseComment);
 
 export {router};

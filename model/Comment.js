@@ -7,6 +7,7 @@ const CommentSchema = new Schema({
     createdAt: Date,
     updatedAt: Date,
     post_id: { type: Schema.Types.ObjectId, ref: 'Post' },
+    compte_id: { type: Schema.Types.ObjectId, ref: 'Compte'},
     commentResponse_ids: [{ type: Schema.Types.ObjectId, ref: 'CommentResponse' }]
 });
 
