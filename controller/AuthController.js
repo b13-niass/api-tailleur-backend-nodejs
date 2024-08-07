@@ -1,7 +1,9 @@
 import jwt from "jsonwebtoken";
+import validator from "validator/es";
 
 import {verifyPassword, hashPassword} from "../utils/password.js";
-import User from "../model/User.js";
+import Compte from "../model/Compte.js";
+import {createJWT} from "../utils/jwt.js";
 
 class AuthController{
 
@@ -9,21 +11,25 @@ class AuthController{
         try {
             const { email, password } = req.body;
 
-            // Trouver l'utilisateur par e-mail
-            const user = await User.findOne({ email }).select('+password');
+            if (!validator.isEmail(email) && !validator.isLength(password, {min: 6})) {
+                return res.json({message:'email ou le mot de passe est invalide', status: 'KO'});
+            }
 
-            if (!user) {
+            const compte = await Compte.findOne({ email }).select('+password');
+
+            if (!compte) {
                 return res.status(404).json({ message: 'Utilisateur non trouvé', status: 'KO' });
             }
 
             // Vérifier le mot de passe
-            const isMatch = await verifyPassword(password, user.password);
+            const isMatch = await verifyPassword(password, compte.password);
             if (!isMatch) {
                 return res.status(400).json({ message: 'Mot de passe incorrect', status: 'KO' });
             }
 
             // Génération d'un token JWT
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1day' });
+            const token = createJWT({ id: compte._id });
+            // const token = jwt.sign({ id: compte._id }, process.env.JWT_SECRET, { expiresIn: '1day' });
 
             res.status(200).json({ token, status: 'OK',message: 'Connexion réussi' });
         } catch (error) {
@@ -42,11 +48,13 @@ class AuthController{
 
     async register(req, res) {
         try {
-            const { nom, prenom, email, password, role } = req.body;
+            const { nom, prenom, email, password, confirm_password, role } = req.body;
+
+           return res.json(req.body);
 
             // Vérifiez si l'utilisateur existe déjà
-            const existingUser = await User.findOne({ email });
-            if (existingUser) {
+            const existingCompte = await Compte.findOne({ email });
+            if (existingCompte) {
                 return res.status(400).json({ message: 'Email déjà utilisé', status: 'KO', });
             }
 

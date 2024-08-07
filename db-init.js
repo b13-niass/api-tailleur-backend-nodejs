@@ -4,7 +4,23 @@
 // The current database to use.
 use('monprojet-tailleur');
 
-db.collection.drop();
+// Drop collections if they exist
+db.clients.drop();
+db.favorites.drop();
+db.tailleurs.drop();
+db.measures.drop();
+db.comptes.drop();
+db.posts.drop();
+db.statuss.drop();
+db.followClients.drop();
+db.comments.drop();
+db.commentResponses.drop();
+db.likes.drop();
+db.messages.drop();
+db.notes.drop();
+db.notifications.drop();
+db.reports.drop();
+db.users.drop();
 
 // Create Collections
 db.createCollection("clients");
@@ -22,7 +38,7 @@ db.createCollection("messages");
 db.createCollection("notes");
 db.createCollection("notifications");
 db.createCollection("reports");
-// db.createCollection("users");
+db.createCollection("users");
 
 // Insert Sample Users
 var userId1 = ObjectId();
@@ -54,6 +70,7 @@ db.users.insertMany([
 // Insert Sample Comptes
 var compteId1 = ObjectId();
 var compteId2 = ObjectId();
+var compteId3 = ObjectId();
 
 db.comptes.insertMany([
     {
@@ -61,7 +78,7 @@ db.comptes.insertMany([
         email: "john.doe@example.com",
         password: "password123",
         etat: "active",
-        role: "user",
+        role: "tailleur",
         createdAt: new Date(),
         updatedAt: new Date(),
         identifiant: "john_doe",
@@ -78,7 +95,7 @@ db.comptes.insertMany([
         email: "jane.smith@example.com",
         password: "password321",
         etat: "active",
-        role: "user",
+        role: "tailleur",
         createdAt: new Date(),
         updatedAt: new Date(),
         identifiant: "jane_smith",
@@ -89,54 +106,25 @@ db.comptes.insertMany([
         follower_ids: [],
         report_ids: [],
         note_ids: []
-    }
-]);
-
-// Insert Sample Measures
-var measureId1 = ObjectId();
-var measureId2 = ObjectId();
-
-db.measures.insertMany([
-    {
-        _id: measureId1,
-        texte: "Measurement 1",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        client_id: ObjectId()  // Placeholder, will update with actual client_id later
     },
     {
-        _id: measureId2,
-        texte: "Measurement 2",
+        _id: compteId3,
+        email: "client@example.com",
+        password: "password456",
+        etat: "active",
+        role: "client",
         createdAt: new Date(),
         updatedAt: new Date(),
-        client_id: ObjectId()  // Placeholder, will update with actual client_id later
+        identifiant: "client_user",
+        bio: "A sample client",
+        user_id: userId1,
+        comment_ids: [],
+        favorite_ids: [],
+        follower_ids: [],
+        report_ids: [],
+        note_ids: []
     }
 ]);
-
-// Insert Sample Clients
-var clientId1 = ObjectId();
-var clientId2 = ObjectId();
-
-db.clients.insertMany([
-    {
-        _id: clientId1,
-        compte_id: compteId1,
-        measure_ids: [measureId1],
-        followClient_ids: []
-    },
-    {
-        _id: clientId2,
-        compte_id: compteId2,
-        measure_ids: [measureId2],
-        followClient_ids: []
-    }
-]);
-
-// Update Measures with Client References
-db.measures.updateMany(
-    { _id: { $in: [measureId1, measureId2] } },
-    { $set: { client_id: { $cond: { if: { $eq: [ "$_id", measureId1 ] }, then: clientId1, else: clientId2 } } } }
-);
 
 // Insert Sample Tailleurs
 var tailleurId1 = ObjectId();
@@ -157,6 +145,45 @@ db.tailleurs.insertMany([
     }
 ]);
 
+// Insert Sample Clients
+var clientId1 = ObjectId();
+
+db.clients.insertMany([
+    {
+        _id: clientId1,
+        compte_id: compteId3,
+        measure_ids: [],
+        followClient_ids: []
+    }
+]);
+
+// Insert Sample Measures
+var measureId1 = ObjectId();
+var measureId2 = ObjectId();
+
+db.measures.insertMany([
+    {
+        _id: measureId1,
+        texte: "Measurement 1",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        client_id: clientId1
+    },
+    {
+        _id: measureId2,
+        texte: "Measurement 2",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        client_id: clientId1
+    }
+]);
+
+// Update Clients with Measure References
+db.clients.updateOne(
+    { _id: clientId1 },
+    { $set: { measure_ids: [measureId1, measureId2] } }
+);
+
 // Insert Sample Posts
 var postId1 = ObjectId();
 var postId2 = ObjectId();
@@ -171,7 +198,7 @@ db.posts.insertMany([
         updatedAt: new Date(),
         shareNb: 10,
         viewsNb: 100,
-        author_id: tailleurId1,
+        author_id: compteId1,
         comment_ids: [],
         like_ids: []
     },
@@ -184,7 +211,7 @@ db.posts.insertMany([
         updatedAt: new Date(),
         shareNb: 20,
         viewsNb: 200,
-        author_id: tailleurId2,
+        author_id: compteId2,
         comment_ids: [],
         like_ids: []
     }
@@ -204,7 +231,7 @@ db.statuss.insertMany([
         createdAt: new Date(),
         updatedAt: new Date(),
         categories: "image",
-        tailleur_id: tailleurId1
+        tailleur_id: compteId1
     },
     {
         _id: statusId2,
@@ -215,18 +242,18 @@ db.statuss.insertMany([
         createdAt: new Date(),
         updatedAt: new Date(),
         categories: "image",
-        tailleur_id: tailleurId2
+        tailleur_id: compteId2
     }
 ]);
 
 // Update Tailleurs with Status and Post References
 db.tailleurs.updateMany(
-    { _id: tailleurId1 },
+    { compte_id: compteId1 },
     { $set: { status_ids: [statusId1], post_ids: [postId1] } }
 );
 
 db.tailleurs.updateMany(
-    { _id: tailleurId2 },
+    { compte_id: compteId2 },
     { $set: { status_ids: [statusId2], post_ids: [postId2] } }
 );
 
@@ -238,11 +265,11 @@ db.followClients.insertMany([
     {
         _id: followClientId1,
         client_id: clientId1,
-        followed_client_id: clientId2
+        followed_client_id: clientId1
     },
     {
         _id: followClientId2,
-        client_id: clientId2,
+        client_id: clientId1,
         followed_client_id: clientId1
     }
 ]);
@@ -404,18 +431,7 @@ db.reports.insertMany([
     }
 ]);
 
-// Insert Sample Clients (Updated)
-db.clients.updateOne(
-    { _id: clientId1 },
-    { $set: { measure_ids: [measureId1] } }
-);
-
-db.clients.updateOne(
-    { _id: clientId2 },
-    { $set: { measure_ids: [measureId2] } }
-);
-
-
+// Insert Sample Favorites
 var favoriteId1 = ObjectId();
 var favoriteId2 = ObjectId();
 
@@ -424,25 +440,25 @@ db.favorites.insertMany([
         _id: favoriteId1,
         createdAt: new Date(),
         updatedAt: new Date(),
-        compte_id: commentId2,
-        post_id: postId2
+        compte_id: compteId1,
+        post_id: postId1
     },
     {
         _id: favoriteId2,
         createdAt: new Date(),
         updatedAt: new Date(),
-        compte_id: commentId1,
-        post_id: postId1
+        compte_id: compteId2,
+        post_id: postId2
     }
 ]);
 
 // Update Comptes with Favorite References
 db.comptes.updateOne(
-    { _id: commentId2 },
+    { _id: compteId1 },
     { $set: { favorite_ids: [favoriteId1] } }
 );
 
 db.comptes.updateOne(
-    { _id: commentId1 },
+    { _id: compteId2 },
     { $set: { favorite_ids: [favoriteId2] } }
 );
