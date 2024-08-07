@@ -1,5 +1,4 @@
 import jwt from "jsonwebtoken";
-import validator from "validator/es";
 
 import {verifyPassword, hashPassword} from "../utils/password.js";
 import Compte from "../model/Compte.js";
@@ -10,10 +9,6 @@ class AuthController{
     async login(req, res) {
         try {
             const { email, password } = req.body;
-
-            if (!validator.isEmail(email) && !validator.isLength(password, {min: 6})) {
-                return res.json({message:'email ou le mot de passe est invalide', status: 'KO'});
-            }
 
             const compte = await Compte.findOne({ email }).select('+password');
 
