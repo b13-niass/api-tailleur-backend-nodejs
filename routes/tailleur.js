@@ -9,15 +9,10 @@ const router = express.Router();
 // Middleware pour vérifier l'authentification
 router.use(isTailleurAuthenticated);
 
-// Route pour obtenir tous les statuts d'un tailleur
 router.route('/status').get(tailleurController.listMyAllPosts).post(tailleurController.createStatus);
 
+router.route('/posts').post(tailleurController.createPost);
+router.route('/posts/:postId').put(tailleurController.updatePost).delete(tailleurController.deletePost);
 
-
-
-// // Vous pouvez aussi utiliser `router.route` si vous avez plusieurs méthodes sur la même route
-// router.route('/posts')
-//     .get(tailleurController.listMyAllPosts)
-//     .post(tailleurController.createPost);
 
 export {router};
