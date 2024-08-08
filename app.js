@@ -1,4 +1,3 @@
-
 import express from "express";
 import "dotenv/config";
 import dbConnection from "./config/db.js";
@@ -22,7 +21,6 @@ app.use(express.json());
 app.use(`${BASE_API}`, authRoutes);
 app.use(`${BASE_API}/client`, clientRoutes);
 app.use(`${BASE_API}/tailleur`, tailleurRoutes);
-
 
 app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
