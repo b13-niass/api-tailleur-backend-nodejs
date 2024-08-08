@@ -26,4 +26,3 @@ app.use(`${BASE_API}/tailleur`, tailleurRoutes);
 app.listen(PORT, () => {
     console.log(`Server is listening on port ${PORT}`);
 });
-

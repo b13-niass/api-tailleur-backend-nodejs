@@ -15,7 +15,7 @@ export const isAuthenticatedGlobal = (req, res, next) => {
 
 /*         req.params.id = user.id;
  */        req.id = user.id; // Stocker les informations de l'utilisateur dans req.user
-      
+
         next();
     })
 }
