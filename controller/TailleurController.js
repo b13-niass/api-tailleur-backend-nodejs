@@ -4,7 +4,7 @@ import Post from "../model/Post.js";
 import Tailleur from "../model/Tailleur.js";
 
 class TailleurController {
-    listMyAllPosts(req, res) {
+    async listMyAllPosts(req, res) {
         try {
             const { tailleurId } = req.params; // Suppose que l'ID du tailleur est passé en paramètre
 
@@ -57,6 +57,7 @@ class TailleurController {
         }
     }
 async createPost(req, res) {
+    try{
             const idTailleur = req.id;
 
             // Valider les champs
