@@ -12,4 +12,4 @@ const UserSchema = new Schema({
     updatedAt: Date
 });
 
-export default mongoose.model('User', UserSchema);
+export default mongoose.model('users', UserSchema);
