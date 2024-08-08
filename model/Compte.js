@@ -14,7 +14,7 @@ const CompteSchema = new Schema({
     user_id: { type: Schema.Types.ObjectId, ref: 'User' },
     comment_ids: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
     favorite_ids: [{ type: Schema.Types.ObjectId, ref: 'Favorite' }],
-    follower_ids: [{ type: Schema.Types.ObjectId, ref: 'FollowTailleur' }],
+    follower_ids: [{ type: Schema.Types.ObjectId, ref: 'Follow' }],
     report_ids: [{ type: Schema.Types.ObjectId, ref: 'Report' }],
     note_ids: [{ type: Schema.Types.ObjectId, ref: 'Note' }]
 });

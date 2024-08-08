@@ -5,7 +5,8 @@ import { Schema } from "mongoose";
 const ClientSchema = new Schema({
     compte_id: { type: Schema.Types.ObjectId, ref: 'Compte' },
     measure_ids: [{ type: Schema.Types.ObjectId, ref: 'Measure' }],
-    followClient_ids: [{ type: Schema.Types.ObjectId, ref: 'FollowClient' }]
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
 });
 
 export default mongoose.model('Client', ClientSchema)

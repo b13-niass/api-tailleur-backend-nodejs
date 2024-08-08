@@ -4,8 +4,8 @@ import { Schema } from "mongoose";
 // CommentResponse Schema
 const CommentResponseSchema = new Schema({
     texte: String,
-    createdAt: Date,
-    updatedAt: Date,
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
     comment_id: { type: Schema.Types.ObjectId, ref: 'Comment' },
     compte_id: { type: Schema.Types.ObjectId, ref: 'Compte'},
 });

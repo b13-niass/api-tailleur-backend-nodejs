@@ -10,10 +10,10 @@ const StatusSchema = new Schema({
   description: String,
   duration: Number,
   viewsNB: Number,
-  createdAt: Date,
-  updatedAt: Date,
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
   categories: { type: String, enum: CategoriesEnum },
-  tailleur_id: { type: Schema.Types.ObjectId, ref: 'tailleurs' }
+  tailleur_id: { type: Schema.Types.ObjectId, ref: 'Tailleur' }
 });
 
 export default mongoose.model('Status', StatusSchema);

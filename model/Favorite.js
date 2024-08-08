@@ -4,7 +4,9 @@ import { Schema } from "mongoose";
 // Favorite Schema with timestamps
 const FavoriteSchema = new Schema({
     compte_id: { type: Schema.Types.ObjectId, ref: 'Compte' },
-    post_id: { type: Schema.Types.ObjectId, ref: 'Post' }
+    post_id: { type: Schema.Types.ObjectId, ref: 'Post' },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 
 // Get All Favorites
@@ -34,8 +36,6 @@ FavoriteSchema.statics.deleteFavorite = async function(compte_id, favorite_id) {
         throw new Error('Erreur lors de la suppression du favori: ' + error.message);
     }
 };
-
-
 
 
 export default mongoose.model('Favorite', FavoriteSchema);
