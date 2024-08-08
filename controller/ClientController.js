@@ -1,6 +1,253 @@
 
-class ClientController{
+import mongoose from "mongoose";
+import User from "../model/User.js"; // Ensure the User model is imported
+import Report from "../model/Report.js"; // Ensure the Report model is imported
+import Post from "../model/Post.js";
+import Status from "../model/Status.js";
+import Notification from '../model/Notification.js';
+import Message from "../model/Message.js";
+import Favorite from "../model/Favorite.js";
+import Compte from "../model/Compte.js";  // Importer le modèle Compte
+import { createJWT } from '../utils/jwt.js';
+import Tailleur from '../model/Tailleur.js';
+import "dotenv/config";
 
+
+const BASE_API = process.env.PREFIX_URI;
+
+class ClientController {
+
+    async createAccount(req, res) {
+        try {
+            // Créez un nouveau compte
+            const newAccount = new Compte({ ...req.body, createdAt: new Date(), updatedAt: new Date() });
+            await newAccount.save();
+
+            // Générer un token JWT contenant l'ID du compte et le rôle
+            const token = createJWT({ payload: { id: newAccount._id, role: newAccount.role } });
+
+            return res.status(201).json({ account: newAccount, token, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }
+
+    async getNewsFeed(req, res) {
+        try {
+            const Posts = await Post.find().populate('author_id').lean();
+            const statuses = await Status.find().populate('tailleur_id').lean();
+            
+            const notifications = await Notification.find().populate('post_id').lean();
+          /*   const messages = await Message.find({ receiver_id: req.user.id }).populate('sender_id').lean();
+            const favorites = await Favorite.find({ compte_id: req.user.id }).populate('post_id').lean();
+     */
+            // Créer un tableau de liens pour les notifications
+          /*   const notificationLinks = notifications.map(notification => {
+                return `${req.protocol}://${req.get('host')}${BASE_API}/notifications/:${notification._id}`;
+            });
+     */
+            // Créer un tableau de liens pour les messages
+          /*   const messageLinks = messages.map(message => {
+                return `${req.protocol}://${req.get('host')}/messages/${message._id}`;
+            });
+    
+            // Créer un tableau de liens pour les favoris
+            const favoriteLinks = favorites.map(favorite => {
+                return `${req.protocol}://${req.get('host')}/favorites/${favorite._id}`;
+            }); */
+    
+            const newsFeed = {
+                Posts,
+                statuses,
+                notificationLinks,  // Inclure uniquement les liens des notifications
+               /*  messageLinks,       // Inclure uniquement les liens des messages
+                favoriteLinks  */      // Inclure uniquement les liens des favoris
+            };
+    
+            return res.status(200).json({ newsFeed, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }
+    
+
+
+    async getAccount(req, res) {
+        try {
+            const account = await Compte.findById(req.params.id).populate('user_id').populate('comment_ids').populate('favorite_ids').populate('follower_ids').populate('report_ids').populate('note_ids');
+            if (!account) {
+                return res.status(404).json({ message: 'Account not found', status: 'KO' });
+            }
+            return res.status(200).json({ account, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }
+
+    async listStatus(req, res) {
+        try {
+            const statuses = await Status.find().populate('tailleur_id');
+            return res.status(200).json({ statuses, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }
+
+ async getNotificationById(req, res) {
+    try {
+        const notification = await Notification.findById(req.params.id).populate('post_id').lean();
+        if (!notification) {
+            return res.status(404).json({ message: 'Notification not found', status: 'KO' });
+        }
+        return res.status(200).json({ notification, status: 'OK' });
+    } catch (err) {
+        return res.status(500).json({ message: err.message, status: 'KO' });
+    }
+}
+
+// De même, ajouter les méthodes pour getMessageById et getFavoriteById
+async getMessageById(req, res) {
+    try {
+        const message = await Message.findById(req.params.id).populate('sender_id').lean();
+        if (!message) {
+            return res.status(404).json({ message: 'Message not found', status: 'KO' });
+        }
+        return res.status(200).json({ message, status: 'OK' });
+    } catch (err) {
+        return res.status(500).json({ message: err.message, status: 'KO' });
+    }
+}
+
+async getFavoriteById(req, res) {
+    try {
+        const favorite = await Favorite.findById(req.params.id).populate('post_id').lean();
+        if (!favorite) {
+            return res.status(404).json({ message: 'Favorite not found', status: 'KO' });
+        }
+        return res.status(200).json({ favorite, status: 'OK' });
+    } catch (err) {
+        return res.status(500).json({ message: err.message, status: 'KO' });
+    }
+}
+
+
+    async listFavorites(req, res) {
+        try {
+            const favorites = await Favorite.find({ compte_id: req.user.id }).populate('post_id');
+            return res.status(200).json({ favorites, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }
+
+    async addFavorite(req, res) {
+        try {
+            const newFavorite = new Favorite({ ...req.body, createdAt: new Date(), updatedAt: new Date() });
+            await newFavorite.save();
+            return res.status(201).json({ favorite: newFavorite, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }
+    async getAllFavorites(req, res) {
+        try {
+            const id = req.id;
+            console.log("ok");
+            // const id = "66b38c03f583892b04f8e6a8";
+            console.log('ID utilisateur:', id);
+
+            // Validate ID'
+            if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+
+                return res.status(400).json({ message: 'ID utilisateur invalide' });
+            }
+            // return res.json(id);            
+
+            // Find the user by ID
+            const user = await Compte.findById(id);
+            if (!user) {
+                return res.status(404).json({ message: 'Utilisateur non trouvé' });
+            }
+
+            // Find all favorites of the user
+            const favorites = await Favorite.find({ compte_id: user._id });;
+            return res.json(favorites);
+        } catch (error) {
+            return res.status(500).json({ message: 'Erreur lors de la récupération des favoris', status: 'KO', error: error.message });
+        }
+    }
+
+    async addFavorite(req, res) {
+        try {
+            const userId = req.id; // Utiliser req.id défini par le middleware
+            const { post_id } = req.body;
+
+            // Valider userId et post_id
+            if (!userId || !mongoose.Types.ObjectId.isValid(userId) || !post_id || !mongoose.Types.ObjectId.isValid(post_id)) {
+                return res.status(400).json({ message: 'ID utilisateur ou ID du post invalide' });
+            }
+
+            // Trouver l'utilisateur par ID
+            const user = await Compte.findById(userId);
+            if (!user) {
+                return res.status(404).json({ message: 'Utilisateur non trouvé' });
+            }
+
+            // Ajouter le favori
+            const favorite = await Favorite.addFavorite(user._id, post_id);
+            return res.status(201).json(favorite);
+        } catch (error) {
+            return res.status(500).json({ message: 'Erreur lors de l\'ajout du favori', status: 'KO', error: error.message });
+        }
+    }
+
+    async deleteFavorite(req, res) {
+        try {
+            const { compte_id, favorite_id } = req.body;
+
+            // Valider compte_id et favorite_id
+            if (!compte_id || !mongoose.Types.ObjectId.isValid(compte_id) || !favorite_id || !mongoose.Types.ObjectId.isValid(favorite_id)) {
+                return res.status(400).json({ message: 'ID du compte ou ID du favori invalide' });
+            }
+
+            // Trouver le favori par ID et le compte associé
+            const result = await Favorite.deleteFavorite(compte_id, favorite_id);
+            if (result.deletedCount === 0) {
+                return res.status(404).json({ message: 'Favori non trouvé ou déjà supprimé' });
+            }
+
+            return res.status(200).json({ message: 'Favori supprimé avec succès' });
+        } catch (error) {
+            return res.status(500).json({ message: 'Erreur lors de la suppression du favori', status: 'KO', error: error.message });
+        }
+    }
+
+
+
+    // Fonction pour signaler un compte
+    async signaler(req, res) {
+        try {
+            const { id, motif } = req.body; // Utiliser req.body pour récupérer l'ID du compte et le motif du signalement
+
+            // Valider l'ID
+            if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+                return res.status(400).json({ message: 'ID utilisateur invalide' });
+            }
+
+            // Trouver le compte par ID
+            const compte = await Compte.findById(id);
+            if (!compte) {
+                return res.status(404).json({ message: 'Compte non trouvé' });
+            }
+
+            // Signaler le compte
+            const rapport = await Report.ReportCompte(id, motif, req.id);
+
+            return res.status(201).json({ message: 'Compte signalé avec succès', rapport });
+        } catch (error) {
+            return res.status(500).json({ message: 'Erreur lors du signalement du compte', status: 'KO', error: error.message });
+        }
+    }
 }
 
 export default new ClientController();
