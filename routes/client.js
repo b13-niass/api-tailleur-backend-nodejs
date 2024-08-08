@@ -41,5 +41,9 @@ router.route('/compte')
 router.route('/compte')
     .get(clientController.getAccount);
 
+router.route('/favorites').get(clientController.getAllFavorites);
+router.route('/favorites/add').post(clientController.addFavorite);
+router.route('/favorites/delete').delete(clientController.deleteFavorite);
+router.route('/compte/report').patch(clientController.signaler);
 
 export { router };

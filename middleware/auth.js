@@ -12,9 +12,10 @@ export const isAuthenticatedGlobal = (req, res, next) => {
             return res.status(403).json({ message: 'Invalid token' });
         }
        // return  res.json(user.id);
+
 /*         req.params.id = user.id;
  */        req.id = user.id; // Stocker les informations de l'utilisateur dans req.user
-
+      
         next();
     })
 }
