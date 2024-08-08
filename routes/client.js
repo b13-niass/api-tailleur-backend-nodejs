@@ -49,4 +49,16 @@ router.route('/favorites/add').post(clientController.addFavorite);
 router.route('/favorites/delete').delete(clientController.deleteFavorite);
 router.route('/compte/report').patch(clientController.signaler);
 
+// Route pour obtenir tous les messages d'un client (utilisateur)
+router.route('/messages').get(clientController.getAllMessages).post(clientController.sendMessage);
+
+// Route pour ajouter un like ou un dislike// Route pour ajouter un like
+router.route('/like').post(clientController.addLike);
+
+// Route pour ajouter un dislike
+router.route('/dislike').post(clientController.addDislike);
+
+// Route pour supprimer un like ou un dislike
+router.route('/unlike').delete(clientController.removeLikeOrDislike);
+
 export { router };
