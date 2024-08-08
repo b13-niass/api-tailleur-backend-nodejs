@@ -79,6 +79,15 @@ class ClientController{
         });
         await newComment.save();
 
+        const post = await Post.findByIdAndUpdate(idPost, {
+            $push: { comment_ids: newComment._id },
+            updatedAt: new Date()
+        }, { new: true });
+
+        if (!post) {
+            return res.status(404).json({message: 'Post non trouvé', status: 'KO'});
+        }
+
         return res.json({comment: newComment, message: 'Commentaire ajouté', status: 'OK'});
 
     }
@@ -90,15 +99,6 @@ class ClientController{
          * valider le content ici
          */
 
-        const comment = await Comment.findByIdAndUpdate(idComment, {
-            $push: { commentResponse_ids: idCompte },
-            updatedAt: new Date()
-        }, { new: true });
-
-        if (!comment) {
-            return res.status(404).json({message: 'Commentaire non trouvé', status: 'KO'});
-        }
-
         const newCommentResponse = new CommentResponse({
             texte: content,
             compte_id: idCompte,
@@ -108,7 +108,47 @@ class ClientController{
         });
         await newCommentResponse.save();
 
+        const comment = await Comment.findByIdAndUpdate(idComment, {
+            $push: { commentResponse_ids: newCommentResponse._id },
+            updatedAt: new Date()
+        }, { new: true });
+
+        if (!comment) {
+            return res.status(404).json({message: 'Commentaire non trouvé', status: 'KO'});
+        }
+
         return res.json({commentResponse: newCommentResponse, message: 'Réponse ajoutée', status: 'OK'});
+    }
+
+    async deleteComment(req, res) {
+        const {idComment} = req.body;
+        const idCompte = req.id;
+
+        const compte = await Compte.findById(idCompte);
+
+        if (compte.role === "tailleur"){
+
+        }
+
+        const comment = await Comment.findByIdAndDelete(idComment);
+
+        if (!comment) {
+            return res.status(404).json({message: 'Commentaire non trouvé', status: 'KO'});
+        }
+
+        return res.json({message: 'Commentaire supprimé', status: 'OK'});
+    }
+
+    async deleteResponseComment(req, res) {
+        const {idCommentResponse} = req.body;
+
+        const commentResponse = await CommentResponse.findByIdAndDelete(idCommentResponse);
+
+        if (!commentResponse) {
+            return res.status(404).json({message: 'Réponse de commentaire non trouvée', status: 'KO'});
+        }
+
+        return res.json({message: 'Réponse de commentaire supprimée', status: 'OK'});
     }
 }
 
