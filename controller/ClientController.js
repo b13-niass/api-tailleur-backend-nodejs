@@ -13,6 +13,7 @@ import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import Comment from "../model/Comment.js";
 import CommentResponse from "../model/CommentResponse.js";
+import Note from "../model/Note.js";
 import "dotenv/config";
 
 class ClientController {
@@ -614,6 +615,29 @@ async getFavoriteById(req, res) {
 
         return res.json({message: 'Réponse de commentaire supprimée', status: 'OK'});
     }
+
+    //fonction pour ajouter la note d'un compte
+    async addNote(req, res) {
+        try {
+            // Récupération des données du corps de la requête
+            const { who_note_id, noted_id, rating } = req.body;
+
+            // Validation des données
+            if (!who_note_id || !noted_id || typeof rating !== 'number') {
+                return res.status(400).json({ error: 'Les champs who_note_id, noted_id et rating sont requis, et rating doit être un nombre.' });
+            }
+
+            // Appel de la méthode statique pour ajouter une note
+            const note = await Note.addNote(who_note_id, noted_id, rating);
+
+            // Réponse réussie
+            return res.status(201).json({ message: 'Note ajoutée avec succès.', note });
+        } catch (error) {
+            // Gestion des erreurs
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
 }
 
 export default new ClientController();

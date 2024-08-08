@@ -30,4 +30,6 @@ CompteSchema.statics.signalerCompte = async function(compte_id) {
     }
 };
 
+
+
 export default mongoose.model('Compte', CompteSchema);
