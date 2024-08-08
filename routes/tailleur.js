@@ -6,8 +6,7 @@ const router = express.Router();
 
 router.use(isTailleurAuthenticated);
 
-router.route('/posts')
-    .get(tailleurController.listMyAllPosts)
-    .post(tailleurController.createPost);
+router.route('/posts').post(tailleurController.createPost);
+router.route('/posts/:postId').put(tailleurController.updatePost).delete(tailleurController.deletePost);
 
 export {router};

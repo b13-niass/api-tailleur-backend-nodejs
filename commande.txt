@@ -1,0 +1,18 @@
+#pour sauvegarder des données dans le cach gitup
+=>git stash
+=> git stqsh qpply // pour avoir les dans le projet
+=> git stash drop // pour supprimer les données sauvegardées
+=> git stash list // pour afficher les données sauvegardées
+=> git stash pop // pour avoir les données sauvegardées dans le projet
+=> git stash apply // pour avoir les données sauvegardées dans le projet
+=> require('crypto').randomBytes(64).toString('hex')// pour pour générer une clé secrete tiken
+=> git config --global user.name "nom" // pour configurer le nom d'utilisateur
+=> git config --global user.email "email" // pour configurer l'adresse email
+=> git config --global user.name // pour afficher le nom d'utilisateur
+=> git config --global user.email // pour afficher l'adresse email
+=> git config --global core.editor "code --wait" // pour configurer l'éditeur
+=> git config --global core.editor // pour afficher l'éditeur
+=> git config --global core.excludesfile // pour configurer les fichiers exclus
+=> git config --global core.excludesfile // pour afficher les fichiers exclus
+=> git config --global core.autocrlf // pour configurer l'auto-crlf
+=> git config --global core.autocrlf // pour afficher l'auto-crlf

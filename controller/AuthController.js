@@ -45,7 +45,7 @@ class AuthController{
         try {
             const { nom, prenom, email, password, confirm_password, role } = req.body;
 
-           return res.json(req.body);
+            return res.json(req.body);
 
             // Vérifiez si l'utilisateur existe déjà
             const existingCompte = await Compte.findOne({ email });

@@ -6,14 +6,14 @@ export const isTailleurAuthenticated = (req, res, next) => {
     if (token == null) {
         return res.status(401).json({ message: 'Token is required', status: 'KO' });
     }
-
+    // req.user = tailleur;
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
             return res.status(403).json({ message: 'Invalid token' , status: 'KO'});
         }
         // res.json({ message: 'Access granted', user });
         if(user && user.role === 'tailleur'){
-            req.params.id = user.id;
+            req.id =  user.id;
             next();
         }else {
             res.status(403).json({message: 'No Authorization', status: 'KO'});
