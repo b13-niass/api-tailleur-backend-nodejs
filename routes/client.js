@@ -7,6 +7,9 @@ const router = express.Router();
 
 router.use(isAuthenticatedGlobal); // Utilisez le middleware pour toutes les routes
 
+// Route pour afficher le profil du client
+router.get('/profile', clientController.showClientProfile);
+
 // Route pour le fil d'actualité
 router.route('/accueil')
     .get(clientController.getNewsFeed); // Route pour obtenir le fil d'actualité
