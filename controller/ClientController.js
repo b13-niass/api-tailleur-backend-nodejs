@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import Favorite from '../model/Favorite.js';
 import User from "../model/User.js"; // Ensure the User model is imported
 import Compte from "../model/Compte.js";
+import Report from "../model/Report.js"; // Ensure the Report model is imported
 
 
 class ClientController {
@@ -80,30 +81,32 @@ class ClientController {
 
 
 
-
     // Fonction pour signaler un compte
     async signaler(req, res) {
         try {
-            const { id } = req.body; // Utiliser req.body pour récupérer l'ID
+            const { id, motif } = req.body; // Utiliser req.body pour récupérer l'ID du compte et le motif du signalement
 
             // Valider l'ID
             if (!id || !mongoose.Types.ObjectId.isValid(id)) {
                 return res.status(400).json({ message: 'ID utilisateur invalide' });
             }
 
-            // Signaler le compte
-            const compte = await Compte.signalerCompte(id);
-
+            // Trouver le compte par ID
+            const compte = await Compte.findById(id);
             if (!compte) {
                 return res.status(404).json({ message: 'Compte non trouvé' });
             }
 
-            return res.status(200).json({ message: 'Compte signalé avec succès' });
+            // Signaler le compte
+            const rapport = await Report.ReportCompte(id, motif, req.id);
+
+            return res.status(201).json({ message: 'Compte signalé avec succès', rapport });
         } catch (error) {
-            return res.status(500).json({ message: 'Erreur lors du signalage du compte', status: 'KO', error: error.message });
+            return res.status(500).json({ message: 'Erreur lors du signalement du compte', status: 'KO', error: error.message });
         }
     }
-
 }
+
+
 
 export default new ClientController();
