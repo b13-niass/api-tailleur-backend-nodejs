@@ -52,6 +52,7 @@ class AuthController {
 
     async register(req, res) {
         try {
+
             const {
                 lastname,
                 firstname,

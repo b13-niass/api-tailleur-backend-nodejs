@@ -19,4 +19,5 @@ export const isClientAuthenticated = (req, res, next) => {
             res.status(403).json({message: 'No Authorization', status: 'KO'});
         }
     })
+    
 }
