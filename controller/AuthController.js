@@ -10,6 +10,7 @@ class AuthController{
         try {
             const { email, password } = req.body;
 
+
             const compte = await Compte.findOne({ email }).select('+password');
 
             if (!compte) {
@@ -45,7 +46,7 @@ class AuthController{
         try {
             const { nom, prenom, email, password, confirm_password, role } = req.body;
 
-           return res.json(req.body);
+           r
 
             // Vérifiez si l'utilisateur existe déjà
             const existingCompte = await Compte.findOne({ email });

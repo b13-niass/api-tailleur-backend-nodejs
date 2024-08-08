@@ -6,4 +6,11 @@ const router = express.Router();
 
 router.use(isAuthenticatedGlobal);
 
-export {router};
+router.get('/favorites', clientController.getAllFavorites);
+router.post('/favorites/add', clientController.addFavorite);
+router.delete('/favorites/delete', clientController.deleteFavorite);
+router.patch('/compte/signale', clientController.signaler);
+
+
+
+export default router;
