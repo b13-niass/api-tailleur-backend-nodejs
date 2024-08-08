@@ -9,3 +9,6 @@ const TailleurSchema = new Schema({
 });
 
 export default mongoose.model('Tailleur', TailleurSchema)
+
+
+
