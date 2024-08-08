@@ -4,7 +4,8 @@ import dbConnection from "./config/db.js";
 import { router as authRoutes } from "./routes/auth.js";
 import { router as clientRoutes } from "./routes/client.js";
 import { router as tailleurRoutes } from "./routes/tailleur.js";
-import { createJWT } from './utils/jwt.js'; // Assurez-vous que createJWT est correctement exporté
+import { createJWT } from './utils/jwt.js';
+import {hashPassword} from "./utils/password.js"; // Assurez-vous que createJWT est correctement exporté
 
 dbConnection();
 

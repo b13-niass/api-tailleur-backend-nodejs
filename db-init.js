@@ -63,12 +63,14 @@ var compteId4 = ObjectId();
 var compteId5 = ObjectId();
 
 db.comptes.insertMany([
-    { _id: compteId1, email: "john.smith@example.com", password: "password123", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "johnsmith", bio: "I am John Smith", user_id: userId1, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
-    { _id: compteId2, email: "jane.doe@example.com", password: "password321", etat: "active", role: "client", createdAt: new Date(), updatedAt: new Date(), identifiant: "janedoe", bio: "I am Jane Doe", user_id: userId2, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
-    { _id: compteId3, email: "charlie.brown@example.com", password: "password111", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "charliebrown", bio: "I am Charlie Brown", user_id: userId3, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
-    { _id: compteId4, email: "emily.johnson@example.com", password: "password222", etat: "active", role: "client", createdAt: new Date(), updatedAt: new Date(), identifiant: "emilyjohnson", bio: "I am Emily Johnson", user_id: userId4, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
-    { _id: compteId5, email: "james.williams@example.com", password: "password333", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "jameswilliams", bio: "I am James Williams", user_id: userId5, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] }
+    { _id: compteId1, email: "john.smith@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "johnsmith", bio: "I am John Smith", user_id: userId1, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
+    { _id: compteId2, email: "jane.doe@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "client", createdAt: new Date(), updatedAt: new Date(), identifiant: "janedoe", bio: "I am Jane Doe", user_id: userId2, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
+    { _id: compteId3, email: "charlie.brown@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "charliebrown", bio: "I am Charlie Brown", user_id: userId3, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
+    { _id: compteId4, email: "emily.johnson@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "client", createdAt: new Date(), updatedAt: new Date(), identifiant: "emilyjohnson", bio: "I am Emily Johnson", user_id: userId4, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
+    { _id: compteId5, email: "james.williams@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "jameswilliams", bio: "I am James Williams", user_id: userId5, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] }
 ]);
+
+// password pour user : password123
 
 // Insert Clients
 var clientId2 = ObjectId();
