@@ -1,10 +1,3 @@
-import Compte from "../model/Compte.js";
-import User from "../model/User.js";
-import Post from "../model/Post.js";
-import Comment from "../model/Comment.js";
-import CommentResponse from "../model/CommentResponse.js";
-
-
 import mongoose from "mongoose";
 import User from "../model/User.js"; // Ensure the User model is imported
 import Report from "../model/Report.js"; // Ensure the Report model is imported
@@ -19,6 +12,8 @@ import Tailleur from '../model/Tailleur.js';
 import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import FollowClient from '../model/FollowClient.js';
+import Comment from "../model/Comment.js";
+import CommentResponse from "../model/CommentResponse.js";
 import "dotenv/config";
 
 class ClientController {
