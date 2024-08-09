@@ -13,6 +13,8 @@ import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import Comment from "../model/Comment.js";
 import CommentResponse from "../model/CommentResponse.js";
+// importer le model mesure
+import Measure from "../model/Measure.js";
 import "dotenv/config";
 
 class ClientController {
@@ -614,6 +616,31 @@ async getFavoriteById(req, res) {
 
         return res.json({message: 'Réponse de commentaire supprimée', status: 'OK'});
     }
+    // methode pour prendre de mesure
+    async takeMeasure(req, res) {
+        try {
+            const {idCompte} = req.params;
+            const {taille, poids, taille_monture, poids_monture} = req.body;
+            const compte = await Compte.findById(idCompte);
+
+            if (!compte) {
+                return res.status(404).json({message: 'Compte non trouvé', status: 'KO'});
+            }
+
+            compte.taille = taille;
+            compte.poids = poids;
+            compte.taille_monture = taille_monture;
+            compte.poids_monture = poids_monture;
+            compte.updatedAt = new Date();
+            await compte.save();
+
+            return res.json({compte, message: 'Compte mis à jour', status: 'OK'});
+        } catch (err) {
+            return res.status(500).json({message: err.message, status: 'oooKO'});
+        }
+    }
+
+
 }
 
 export default new ClientController();

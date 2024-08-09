@@ -109,7 +109,6 @@ async createPost(req, res) {
         }
     }
 
-  
     async updatePost(req, res) {
         try {
             const { postId } = req.params;
@@ -155,7 +154,6 @@ async createPost(req, res) {
                 { compte_id: idTailleur },
                 { $pull: { post_ids: postId } }
             );
-
             res.status(200).json({ message: "Post deleted successfully", status: 'OK' });
         } catch (err) {
             return res.status(500).json({message: err.message, status: 'KO'});

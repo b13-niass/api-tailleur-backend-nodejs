@@ -18,7 +18,6 @@ router.route('/accueil')
  router.route('/posts')
     .get(tailleurController.listMyAllPosts)
     .post(tailleurController.createPost);
- 
 
 // Routes pour les statuts
 router.route('/status')
@@ -66,7 +65,7 @@ router.route('/profile').get(clientController.userProfile);
 router.route('/accueil/search').post(clientController.accueilSearch);
 router.route('/posts/comment').post(clientController.ajoutComment).delete(clientController.deleteComment);
 router.route('/posts/comment/reponse').post(clientController.reponseComment).delete(clientController.deleteResponseComment);
-
+// route pour enregistrer mesure
+router.route('/mesure').post(clientController.takeMeasure);
 
 export { router };
-
