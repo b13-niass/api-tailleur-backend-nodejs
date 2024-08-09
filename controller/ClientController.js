@@ -339,7 +339,9 @@ async getFavoriteById(req, res) {
             const newMessage = new Message({
                 texte,
                 sender_id: senderId,
-                receiver_id: receiverId
+                receiver_id: receiverId,
+                createdAt: new Date(),
+              
             });
 
             // Sauvegarder le message dans la base de données
@@ -386,9 +388,11 @@ async getFavoriteById(req, res) {
 
             const savedLike = await newLike.save();
 
-            // Incrémenter le compteur de likes
-            await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } });
-
+            await Post.findByIdAndUpdate(postId, {
+                $inc: { likeCount: 1 },
+                $addToSet: { like_ids: savedLike._id }
+            });
+    
             res.status(201).json({ message: 'Like ajouté avec succès', data: savedLike, status: 'OK' });
 
         } catch (err) {
@@ -614,6 +618,120 @@ async getFavoriteById(req, res) {
 
         return res.json({message: 'Réponse de commentaire supprimée', status: 'OK'});
     }
+
+// Méthode pour incrémenter le nombre de partages
+async  ShareNb(req, res) {
+    try {
+        const { postId } = req.body; // Assurez-vous d'utiliser req.body si vous passez postId dans le corps
+
+        console.log('Received postId:', postId);
+
+        // Vérifier si l'ID est un ObjectId valide
+        if (!mongoose.Types.ObjectId.isValid(postId)) {
+            console.log('Invalid postId');
+            return res.status(400).json({ message: 'ID de post invalide', status: 'KO' });
+        }
+
+        // Rechercher le post par ID
+        const post = await Post.findById(postId);
+        if (!post) {
+            console.log('Post not found');
+            return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
+        }
+
+        // Incrémenter le nombre de partages
+        const updatedPost = await Post.findByIdAndUpdate(
+            postId,
+            { $inc: { shareNb: 1 } },
+            { new: true, fields: { shareNb: 1 } } 
+        );
+
+        if (!updatedPost) {
+            return res.status(404).json({ message: 'Post non trouvé après mise à jour', status: 'KO' });
+        }
+
+        console.log('Share count updated:', updatedPost.shareNb);
+
+        // Retourner la nouvelle valeur de shareNb
+        return res.status(200).json({
+            message: 'Partage réussi.',
+            data: { shareNb: updatedPost.shareNb },
+            status: 'OK',
+        });
+    } catch (error) {
+        console.error('Error during sharing:', error);
+        return res.status(500).json({ message: 'Erreur lors du partage.', error: error.message, status: 'KO' });
+    }
 }
+
+    async  ViewsNb(req, res) {
+        try {
+            const { postId } = req.body; // Assurez-vous d'utiliser req.body si vous passez postId dans le corps
+    
+            console.log('Received postId:', postId);
+    
+            // Vérifier si l'ID est un ObjectId valide
+            if (!mongoose.Types.ObjectId.isValid(postId)) {
+                console.log('Invalid postId');
+                return res.status(400).json({ message: 'ID de post invalide', status: 'KO' });
+            }
+    
+            // Rechercher le post par ID
+            const post = await Post.findById(postId);
+            if (!post) {
+                console.log('Post not found');
+                return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
+            }
+    
+            // Incrémenter le nombre de partages
+            const updatedPost = await Post.findByIdAndUpdate(
+                postId,
+                { $inc: { viewsNb: 1 } },
+                { new: true, fields: { viewsNb: 1 } } 
+            );
+    
+            if (!updatedPost) {
+                return res.status(404).json({ message: 'Post non trouvé après mise à jour', status: 'KO' });
+            }
+    
+            console.log('Share count updated:', updatedPost.shareNb);
+    
+            // Retourner la nouvelle valeur de shareNb
+            return res.status(200).json({
+                message: 'Vous avez vue ce contenu.',
+                data: { viewsNb: updatedPost.viewsNb },
+                status: 'OK',
+            });
+        } catch (error) {
+            console.error('Error during sharing:', error);
+            return res.status(500).json({ message: 'Erreur lors de la visualisation.', error: error.message, status: 'KO' });
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export default new ClientController();
