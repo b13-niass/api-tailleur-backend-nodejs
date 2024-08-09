@@ -11,6 +11,7 @@ const CompteSchema = new Schema({
     updatedAt: Date,
     identifiant: String,
     bio: String,
+    credit: Number,
     user_id: { type: Schema.Types.ObjectId, ref: 'User' },
     comment_ids: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
     favorite_ids: [{ type: Schema.Types.ObjectId, ref: 'Favorite' }],

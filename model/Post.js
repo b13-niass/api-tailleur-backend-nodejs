@@ -11,6 +11,7 @@ const PostSchema = new Schema({
     updatedAt: { type: Date, default: Date.now },
     shareNb: Number,
     viewsNb: Number,
+    cout: {type: Number, default: 2},
     author_id: { type: Schema.Types.ObjectId, ref: 'Tailleur' },
     comment_ids: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
     like_ids: [{ type: Schema.Types.ObjectId, ref: 'Like' }]
