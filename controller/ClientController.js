@@ -230,34 +230,35 @@ async getFavoriteById(req, res) {
         }
     }
   
-   async showClientProfile(req, res) {
+    async showClientProfile(req, res) {
         try {
             const idUser = req.id;
             console.log("User ID: ", idUser);
-
+    
             // Trouver le compte par ID
             const compte = await Compte.findById(idUser).exec();
             if (!compte) {
                 return res.status(404).json({ message: 'Compte not found', status: 'KO' });
             }
             console.log("Compte trouvé: ", compte);
-
+    
             // Récupérer le user_id depuis le compte
             const userId = compte.user_id;
             if (!userId) {
                 return res.status(404).json({ message: 'User ID not found in compte', status: 'KO' });
             }
-
+    
             // Trouver les informations de l'utilisateur en utilisant user_id
             const user = await User.findById(userId).exec();
             if (!user) {
                 return res.status(404).json({ message: 'User not found', status: 'KO' });
             }
             console.log("Utilisateur trouvé: ", user);
-
+    
             let posts = [];
-
+    
             if (compte.role === 'tailleur') {
+                // Si le compte est un tailleur, récupérer ses posts
                 const tailleur = await Tailleur.findOne({ compte_id: compte._id }).exec();
                 if (tailleur) {
                     posts = await Post.find({ _id: { $in: tailleur.post_ids } }).exec();
@@ -265,24 +266,46 @@ async getFavoriteById(req, res) {
                     throw new Error('Tailleur not found');
                 }
             } else if (compte.role === 'client') {
+                // Si le compte est un client, récupérer les posts des tailleurs suivis
                 const client = await Client.findOne({ compte_id: compte._id }).exec();
                 if (client && client.followClient_ids.length > 0) {
                     const followClients = await FollowClient.find({ client_id: client._id }).exec();
                     const followedClientIds = followClients.map(follow => follow.followed_client_id);
-            
+    
+                    // Trouver les tailleurs suivis avec des comptes actifs
                     const tailleurs = await Tailleur.find({ compte_id: { $in: followedClientIds } }).exec();
-                    const tailleurIds = tailleurs.map(tailleur => tailleur._id);
-            
-                    posts = await Post.find({ author_id: { $in: tailleurIds } }).exec();
+                    const activeTailleurIds = [];
+    
+                    for (const tailleur of tailleurs) {
+                        const compteSuivi = await Compte.findById(tailleur.compte_id).exec();
+                        if (compteSuivi && compteSuivi.etat === 'active') {
+                            activeTailleurIds.push(tailleur._id);
+                        }
+                    }
+    
+                    // Récupérer les posts des tailleurs actifs
+                    posts = await Post.find({ author_id: { $in: activeTailleurIds } }).exec();
                 }
             } else {
                 throw new Error('Unknown role');
             }
-            
+    
             // Répondre avec les données trouvées
             res.status(200).json({
-                compte,
-                user,
+                // compte,
+                // user,
+                // posts,
+                // role: compte.role
+                compte: {
+                    role: compte.role,
+                    etat: compte.etat,
+                },
+                user: {
+                    lastname: user.lastname,
+                    firstname: user.firstname,
+                    city: user.city,
+                    picture: user.picture,
+                },
                 posts,
                 role: compte.role
             });
@@ -291,6 +314,7 @@ async getFavoriteById(req, res) {
             res.status(500).json({ message: 'Internal server error', status: 'KO' });
         }
     }
+    
   
    // Récupérer tous les messages d'un client (utilisateur)
     async getAllMessages(req, res) {
