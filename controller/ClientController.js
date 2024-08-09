@@ -36,14 +36,13 @@ class ClientController {
         try {
             const Posts = await Post.find().populate('author_id').lean();
             const statuses = await Status.find().populate('tailleur_id').lean();
-            
-            const notifications = await Notification.find().populate('post_id').lean();
-    
+/*             const notifications = await Notification.find().populate('post_id').lean();
+ */    
             const newsFeed = {
                 Posts,
                 statuses,
-                notificationLinks,  // Inclure uniquement les liens des notifications
-               /*  messageLinks,       // Inclure uniquement les liens des messages
+/*                 notifications,  // Inclure uniquement les liens des notifications
+ */               /*  messageLinks,       // Inclure uniquement les liens des messages
                 favoriteLinks  */      // Inclure uniquement les liens des favoris
             };
     
@@ -65,14 +64,8 @@ class ClientController {
         }
     }
 
-    async listStatus(req, res) {
-        try {
-            const statuses = await Status.find().populate('tailleur_id');
-            return res.status(200).json({ statuses, status: 'OK' });
-        } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
-        }
-    }
+
+   
 
  async getNotificationById(req, res) {
     try {
@@ -617,3 +610,28 @@ async getFavoriteById(req, res) {
 }
 
 export default new ClientController();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

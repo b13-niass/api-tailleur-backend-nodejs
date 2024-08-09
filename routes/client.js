@@ -15,14 +15,15 @@ router.route('/accueil')
     .get(clientController.getNewsFeed); // Route pour obtenir le fil d'actualité
 
 // Routes pour les posts
- router.route('/posts')
+ router.route('/posts/:id')
     .get(tailleurController.listMyAllPosts)
     .post(tailleurController.createPost);
  
 
 // Routes pour les statuts
 router.route('/status')
-    .get(clientController.listStatus);
+    .get(tailleurController.listStatus)
+    .post(tailleurController.createStatus);
 
 // Routes pour les messages
 
@@ -40,7 +41,7 @@ router.route('/favorites/:id')
 // Route pour créer un compte
 router.route('/compte')
     .post(clientController.createAccount);
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 router.route('/compte')
     .get(clientController.getAccount);
 

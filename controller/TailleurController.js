@@ -2,8 +2,11 @@ import mongoose from 'mongoose';
 import Status from '../model/Status.js';
 import Post from "../model/Post.js";
 import Tailleur from "../model/Tailleur.js";
+import Compte from "../model/Compte.js";
+import follow from "../model/Follow.js";
 
 class TailleurController {
+ 
     async listMyAllPosts(req, res) {
         try {
             const { tailleurId } = req.params; // Suppose que l'ID du tailleur est passé en paramètre
@@ -25,7 +28,7 @@ class TailleurController {
             return res.status(500).json({ message: err.message, status: 'KO' });
         }
     }
-
+    
     // Créer un nouveau statut
     async createStatus(req, res) {
         try {
@@ -42,7 +45,7 @@ class TailleurController {
             const newStatus = new Status({
                 files: files || 'example.mp4',
                 description: description || 'Model du jour',
-                duration: duration || 120,
+                duration: duration ,
                 viewsNB: viewsNB || 1000,
                 categories: categories || 'video',
                 tailleur_id: tailleurId
@@ -56,6 +59,84 @@ class TailleurController {
             res.status(500).json({ message: error.message, status: 'KO' });
         }
     }
+    async listStatus(req, res) {
+/*         return res.json(1);
+ */        try {
+            const userId = req.id;  // ID de l'utilisateur connecté passé en paramètre
+            const now = new Date();
+           
+            // Récupérer le compte de l'utilisateur connecté
+            const account = await Compte.findById(userId).populate('follower_ids').lean();
+          
+            
+            if (!account) {
+                return res.status(404).json({ message: 'Compte introuvable', status: 'KO' });
+            }
+            
+/*             console.log(account)
+ */
+            const userType = account.role;  
+            
+            // Type d'utilisateur ('client' ou 'tailleur')
+            let statuses = [];
+/*             console.log(userType);
+ */            
+/*             console.log('ID extrait de la requête:', req.id || req.body.tailleurId);
+ */
+            if (userType === 'client') {
+                // Si c'est un client, récupérer les statuts des tailleurs qu'il suit
+                const tailleursSuivis = account.follower_ids.map(follower => follower._id); // Liste des ID des tailleurs suivis
+                statuses = await Status.find({ tailleur_id: { $in: tailleursSuivis } }).populate('tailleur_id').lean();
+            } else if (userType === 'tailleur') {
+                // Si c'est un tailleur, récupérer les statuts des tailleurs qu'il suit et ses propres statuts
+                const tailleursSuivis = account.follower_ids.map(follower => follower._id); // Liste des ID des tailleurs suivis
+                statuses = await Status.find({ 
+                    $or: [
+                        { tailleur_id: { $in: tailleursSuivis } }, // Statuts des tailleurs suivis
+                        { tailleur_id: userId } // Ses propres statuts
+                    ] 
+                }).populate('tailleur_id').lean();
+            }
+
+    
+            // Filtrer les statuts non expirés
+        const activeStatuses = statuses.filter(status => {
+            const createdAt = new Date(status.createdAt);
+            const durationInSeconds = status.duration * 60; // Durée du statut en secondes
+            const differenceInSeconds = (now - createdAt) / 1000; // Conversion des millisecondes en secondes
+
+            // Garder les statuts qui ne sont pas expirés
+            return (differenceInSeconds <= durationInSeconds && differenceInSeconds <= 86400); // Moins de 24 heures
+        });
+
+        console.log('Statuts actifs:', activeStatuses);
+
+        // Supprimer les statuts expirés
+        const statusesToDelete = statuses.filter(status => {
+            const createdAt = new Date(status.createdAt);
+            const durationInSeconds = status.duration * 60; // Durée du statut en secondes
+            const differenceInSeconds = (now - createdAt) / 1000; // Conversion des millisecondes en secondes
+
+            // Supprimer les statuts dont la durée est dépassée
+            return (differenceInSeconds > durationInSeconds);
+        });
+            
+            // Log les statuts à supprimer avant la suppression
+            console.log('Statuts à supprimer:',statuses, statusesToDelete.map(status => status._id));
+    
+            if (statusesToDelete.length > 0) {
+                const deleteResult = await Status.deleteMany({ _id: { $in: statusesToDelete.map(status => status._id) } });
+                // Log le résultat de la suppression
+                console.log('Résultat de la suppression:', deleteResult);
+            }
+    
+            return res.status(200).json({ statuses: activeStatuses, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }
+    
+    
 async createPost(req, res) {
     try{
             const idTailleur = req.id;
