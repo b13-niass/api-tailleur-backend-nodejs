@@ -6,6 +6,7 @@ import Tailleur from "../model/Tailleur.js";
 import {createJWT} from "../utils/jwt.js";
 import User from "../model/User.js";
 import Client from "../model/Client.js";
+import bloquer from "../model/Bloquer.js";
 
 class AuthController {
 
@@ -27,9 +28,13 @@ class AuthController {
             }
 
             // Vérifier le mot de passe
-            const isMatch = await verifyPassword(password, compte.password);
+           /*  const isMatch = await verifyPassword(password, compte.password);
             if (!isMatch) {
                 return res.status(400).json({message: 'Mot de passe incorrect', status: 'KO'});
+            } */
+
+            if(compte.etat === 'desactiver'){
+                return res.status(200).json({message: 'Votre compte est desactivé', status: 'KO'});
             }
 
             // Génération d'un token JWT
@@ -71,14 +76,18 @@ class AuthController {
              */
 
             // Vérifiez si l'utilisateur existe déjà
-            const existingUser = await Compte.findOne({
+            const existingCompte = await Compte.findOne({
                 $or: [
                     { email},
                     { identifiant}
                 ]
             });
-            if (existingUser) {
-                return res.status(400).json({message: 'Email déjà utilisé', status: 'KO',});
+            if (existingCompte) {
+                return res.status(400).json({message: 'Ce compte existe déjà', status: 'KO',});
+            }
+            const existingUser = await User.findOne({phone});
+            if (existingUser){
+                return res.status(400).json({message: 'Ce compte existe déjà', status: 'KO',});
             }
 
             if (password !== confirm_password){
@@ -150,7 +159,16 @@ class AuthController {
         }
     }
 
+
+
+
+//bloquer utilisateur
+
 }
+
+
+// Autres méthodes...
+
 
 export default new AuthController();
 

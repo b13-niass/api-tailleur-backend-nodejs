@@ -7,14 +7,21 @@ import Notification from '../model/Notification.js';
 import Message from "../model/Message.js";
 import Favorite from "../model/Favorite.js";
 import Compte from "../model/Compte.js";  // Importer le modèle Compte
-import { createJWT } from '../utils/jwt.js';
+import {createJWT} from '../utils/jwt.js';
 import Tailleur from '../model/Tailleur.js';
 import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import Comment from "../model/Comment.js";
 import CommentResponse from "../model/CommentResponse.js";
 import Note from "../model/Note.js";
+
+import Measure from "../model/Measure.js";
+import TissuPost from '../model/TissuPost.js';
+import Commande from '../model/Commande.js';
+
 import "dotenv/config";
+import comment from "../model/Comment.js";
+import Follow from "../model/Follow.js";
 
 
 class ClientController {
@@ -22,15 +29,15 @@ class ClientController {
     async createAccount(req, res) {
         try {
             // Créez un nouveau compte
-            const newAccount = new Compte({ ...req.body, createdAt: new Date(), updatedAt: new Date() });
+            const newAccount = new Compte({...req.body, createdAt: new Date(), updatedAt: new Date()});
             await newAccount.save();
 
             // Générer un token JWT contenant l'ID du compte et le rôle
-            const token = createJWT({ payload: { id: newAccount._id, role: newAccount.role } });
+            const token = createJWT({payload: {id: newAccount._id, role: newAccount.role}});
 
-            return res.status(201).json({ account: newAccount, token, status: 'OK' });
+            return res.status(201).json({account: newAccount, token, status: 'OK'});
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
@@ -39,19 +46,20 @@ class ClientController {
             const Posts = await Post.find().populate('author_id').lean();
             const statuses = await Status.find().populate('tailleur_id').lean();
 
-            const notifications = await Notification.find().populate('post_id').lean();
 
+/*             const notifications = await Notification.find().populate('post_id').lean();
+ */    
             const newsFeed = {
                 Posts,
                 statuses,
-                notificationLinks,  // Inclure uniquement les liens des notifications
-                /*  messageLinks,       // Inclure uniquement les liens des messages
-                 favoriteLinks  */      // Inclure uniquement les liens des favoris
-            };
+/*                 notifications,  // Inclure uniquement les liens des notifications
+ */               /*  messageLinks,       // Inclure uniquement les liens des messages
+                favoriteLinks  */      // Inclure uniquement les liens des favoris
 
-            return res.status(200).json({ newsFeed, status: 'OK' });
+            };
+            return res.status(200).json({newsFeed, status: 'OK'});
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
@@ -59,18 +67,21 @@ class ClientController {
         try {
             const account = await Compte.findById(req.params.id).populate('user_id').populate('comment_ids').populate('favorite_ids').populate('follower_ids').populate('report_ids').populate('note_ids');
             if (!account) {
-                return res.status(404).json({ message: 'Account not found', status: 'KO' });
+                return res.status(404).json({message: 'Account not found', status: 'KO'});
             }
-            return res.status(200).json({ account, status: 'OK' });
+            return res.status(200).json({account, status: 'OK'});
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
-    async listStatus(req, res) {
+    async getNotificationById(req, res) {
         try {
-            const statuses = await Status.find().populate('tailleur_id');
-            return res.status(200).json({ statuses, status: 'OK' });
+            const notification = await Notification.findById(req.params.id).populate('post_id').lean();
+            if (!notification) {
+                return res.status(404).json({ message: 'Notification not found', status: 'KO' });
+            }
+            return res.status(200).json({ notification, status: 'OK' });
         } catch (err) {
             return res.status(500).json({ message: err.message, status: 'KO' });
         }
@@ -116,22 +127,23 @@ class ClientController {
 
     async listFavorites(req, res) {
         try {
-            const favorites = await Favorite.find({ compte_id: req.user.id }).populate('post_id');
-            return res.status(200).json({ favorites, status: 'OK' });
+            const favorites = await Favorite.find({compte_id: req.user.id}).populate('post_id');
+            return res.status(200).json({favorites, status: 'OK'});
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
     async addFavorite(req, res) {
         try {
-            const newFavorite = new Favorite({ ...req.body, createdAt: new Date(), updatedAt: new Date() });
+            const newFavorite = new Favorite({...req.body, createdAt: new Date(), updatedAt: new Date()});
             await newFavorite.save();
-            return res.status(201).json({ favorite: newFavorite, status: 'OK' });
+            return res.status(201).json({favorite: newFavorite, status: 'OK'});
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
+
     async getAllFavorites(req, res) {
         try {
             const id = req.id;
@@ -142,93 +154,109 @@ class ClientController {
             // Validate ID'
             if (!id || !mongoose.Types.ObjectId.isValid(id)) {
 
-                return res.status(400).json({ message: 'ID utilisateur invalide' });
+                return res.status(400).json({message: 'ID utilisateur invalide'});
             }
             // return res.json(id);            
 
             // Find the user by ID
             const user = await Compte.findById(id);
             if (!user) {
-                return res.status(404).json({ message: 'Utilisateur non trouvé' });
+                return res.status(404).json({message: 'Utilisateur non trouvé'});
             }
 
             // Find all favorites of the user
-            const favorites = await Favorite.find({ compte_id: user._id });;
+            const favorites = await Favorite.find({compte_id: user._id});
+            ;
             return res.json(favorites);
         } catch (error) {
-            return res.status(500).json({ message: 'Erreur lors de la récupération des favoris', status: 'KO', error: error.message });
+            return res.status(500).json({
+                message: 'Erreur lors de la récupération des favoris',
+                status: 'KO',
+                error: error.message
+            });
         }
     }
 
     async addFavorite(req, res) {
         try {
             const userId = req.id; // Utiliser req.id défini par le middleware
-            const { post_id } = req.body;
+            const {post_id} = req.body;
 
             // Valider userId et post_id
             if (!userId || !mongoose.Types.ObjectId.isValid(userId) || !post_id || !mongoose.Types.ObjectId.isValid(post_id)) {
-                return res.status(400).json({ message: 'ID utilisateur ou ID du post invalide' });
+                return res.status(400).json({message: 'ID utilisateur ou ID du post invalide'});
             }
 
             // Trouver l'utilisateur par ID
             const user = await Compte.findById(userId);
             if (!user) {
-                return res.status(404).json({ message: 'Utilisateur non trouvé' });
+                return res.status(404).json({message: 'Utilisateur non trouvé'});
             }
 
             // Ajouter le favori
             const favorite = await Favorite.addFavorite(user._id, post_id);
             return res.status(201).json(favorite);
         } catch (error) {
-            return res.status(500).json({ message: 'Erreur lors de l\'ajout du favori', status: 'KO', error: error.message });
+            return res.status(500).json({
+                message: 'Erreur lors de l\'ajout du favori',
+                status: 'KO',
+                error: error.message
+            });
         }
     }
 
     async deleteFavorite(req, res) {
         try {
-            const { compte_id, favorite_id } = req.body;
+            const {compte_id, favorite_id} = req.body;
 
             // Valider compte_id et favorite_id
             if (!compte_id || !mongoose.Types.ObjectId.isValid(compte_id) || !favorite_id || !mongoose.Types.ObjectId.isValid(favorite_id)) {
-                return res.status(400).json({ message: 'ID du compte ou ID du favori invalide' });
+                return res.status(400).json({message: 'ID du compte ou ID du favori invalide'});
             }
 
             // Trouver le favori par ID et le compte associé
             const result = await Favorite.deleteFavorite(compte_id, favorite_id);
             if (result.deletedCount === 0) {
-                return res.status(404).json({ message: 'Favori non trouvé ou déjà supprimé' });
+                return res.status(404).json({message: 'Favori non trouvé ou déjà supprimé'});
             }
 
-            return res.status(200).json({ message: 'Favori supprimé avec succès' });
+            return res.status(200).json({message: 'Favori supprimé avec succès'});
         } catch (error) {
-            return res.status(500).json({ message: 'Erreur lors de la suppression du favori', status: 'KO', error: error.message });
+            return res.status(500).json({
+                message: 'Erreur lors de la suppression du favori',
+                status: 'KO',
+                error: error.message
+            });
         }
     }
-
 
 
     // Fonction pour signaler un compte
     async signaler(req, res) {
         try {
-            const { id, motif } = req.body; // Utiliser req.body pour récupérer l'ID du compte et le motif du signalement
+            const {id, motif} = req.body; // Utiliser req.body pour récupérer l'ID du compte et le motif du signalement
 
             // Valider l'ID
             if (!id || !mongoose.Types.ObjectId.isValid(id)) {
-                return res.status(400).json({ message: 'ID utilisateur invalide' });
+                return res.status(400).json({message: 'ID utilisateur invalide'});
             }
 
             // Trouver le compte par ID
             const compte = await Compte.findById(id);
             if (!compte) {
-                return res.status(404).json({ message: 'Compte non trouvé' });
+                return res.status(404).json({message: 'Compte non trouvé'});
             }
 
             // Signaler le compte
             const rapport = await Report.ReportCompte(id, motif, req.id);
 
-            return res.status(201).json({ message: 'Compte signalé avec succès', rapport });
+            return res.status(201).json({message: 'Compte signalé avec succès', rapport});
         } catch (error) {
-            return res.status(500).json({ message: 'Erreur lors du signalement du compte', status: 'KO', error: error.message });
+            return res.status(500).json({
+                message: 'Erreur lors du signalement du compte',
+                status: 'KO',
+                error: error.message
+            });
         }
     }
 
@@ -236,46 +264,58 @@ class ClientController {
         try {
             const idUser = req.id;
             console.log("User ID: ", idUser);
-
+    
             // Trouver le compte par ID
             const compte = await Compte.findById(idUser).exec();
             if (!compte) {
-                return res.status(404).json({ message: 'Compte not found', status: 'KO' });
+                return res.status(404).json({message: 'Compte not found', status: 'KO'});
             }
             console.log("Compte trouvé: ", compte);
-
+    
             // Récupérer le user_id depuis le compte
             const userId = compte.user_id;
             if (!userId) {
-                return res.status(404).json({ message: 'User ID not found in compte', status: 'KO' });
+                return res.status(404).json({message: 'User ID not found in compte', status: 'KO'});
             }
-
+    
             // Trouver les informations de l'utilisateur en utilisant user_id
             const user = await User.findById(userId).exec();
             if (!user) {
-                return res.status(404).json({ message: 'User not found', status: 'KO' });
+                return res.status(404).json({message: 'User not found', status: 'KO'});
             }
             console.log("Utilisateur trouvé: ", user);
-
+    
             let posts = [];
-
+    
             if (compte.role === 'tailleur') {
+                // Si le compte est un tailleur, récupérer ses posts
                 const tailleur = await Tailleur.findOne({ compte_id: compte._id }).exec();
+
                 if (tailleur) {
-                    posts = await Post.find({ _id: { $in: tailleur.post_ids } }).exec();
+                    posts = await Post.find({_id: {$in: tailleur.post_ids}}).exec();
                 } else {
                     throw new Error('Tailleur not found');
                 }
             } else if (compte.role === 'client') {
-                const client = await Client.findOne({ compte_id: compte._id }).exec();
+
+                const client = await Client.findOne({compte_id: compte._id}).exec();
                 if (client && client.followClient_ids.length > 0) {
-                    const followClients = await FollowClient.find({ client_id: client._id }).exec();
+                    const followClients = await FollowClient.find({client_id: client._id}).exec();
                     const followedClientIds = followClients.map(follow => follow.followed_client_id);
-
+    
+                    // Trouver les tailleurs suivis avec des comptes actifs
                     const tailleurs = await Tailleur.find({ compte_id: { $in: followedClientIds } }).exec();
-                    const tailleurIds = tailleurs.map(tailleur => tailleur._id);
-
-                    posts = await Post.find({ author_id: { $in: tailleurIds } }).exec();
+                    const activeTailleurIds = [];
+    
+                    for (const tailleur of tailleurs) {
+                        const compteSuivi = await Compte.findById(tailleur.compte_id).exec();
+                        if (compteSuivi && compteSuivi.etat === 'active') {
+                            activeTailleurIds.push(tailleur._id);
+                        }
+                    }
+    
+                    // Récupérer les posts des tailleurs actifs
+                    posts = await Post.find({ author_id: { $in: activeTailleurIds } }).exec();
                 }
             } else {
                 throw new Error('Unknown role');
@@ -283,14 +323,28 @@ class ClientController {
 
             // Répondre avec les données trouvées
             res.status(200).json({
-                compte,
-                user,
+
+                // compte,
+                // user,
+                // posts,
+                // role: compte.role
+
+                compte: {
+                    role: compte.role,
+                    etat: compte.etat,
+                },
+                user: {
+                    lastname: user.lastname,
+                    firstname: user.firstname,
+                    city: user.city,
+                    picture: user.picture,
+                },
                 posts,
                 role: compte.role
             });
         } catch (error) {
             console.error('Error fetching client profile:', error);
-            res.status(500).json({ message: 'Internal server error', status: 'KO' });
+            res.status(500).json({message: 'Internal server error', status: 'KO'});
         }
     }
 
@@ -301,23 +355,23 @@ class ClientController {
 
 
             if (!mongoose.Types.ObjectId.isValid(clientId)) {
-                return res.status(400).json({ message: 'ID du client invalide', status: 'KO' });
+                return res.status(400).json({message: 'ID du client invalide', status: 'KO'});
             }
 
             const messages = await Message.find({
                 $or: [
-                    { sender_id: clientId },
-                    { receiver_id: clientId }
+                    {sender_id: clientId},
+                    {receiver_id: clientId}
                 ]
             }).populate('sender_id receiver_id', 'nom email');
 
             if (messages.length === 0) {
-                return res.status(404).json({ message: 'Aucun message trouvé', status: 'KO' });
+                return res.status(404).json({message: 'Aucun message trouvé', status: 'KO'});
             }
 
-            res.status(200).json({ messages, status: 'OK' });
+            res.status(200).json({messages, status: 'OK'});
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
@@ -328,42 +382,41 @@ class ClientController {
             const receiverId = req.params.receiverId || req.body.receiverId || req.id;
             const texte = req.params.texte || req.body.texte || req.id;
 
-
             // Utilisez ces valeurs pour tester la fonction
-
-
             // Vérifiez si les IDs sont valides
             if (!mongoose.Types.ObjectId.isValid(senderId) || !mongoose.Types.ObjectId.isValid(receiverId)) {
-                return res.status(400).json({ message: 'ID de l’expéditeur ou du destinataire invalide', status: 'KO' });
+                return res.status(400).json({message: 'ID de l’expéditeur ou du destinataire invalide', status: 'KO'});
             }
 
             // Créer un nouveau message
             const newMessage = new Message({
                 texte,
                 sender_id: senderId,
-                receiver_id: receiverId
+                receiver_id: receiverId,
+                createdAt: new Date(),
+
             });
 
             // Sauvegarder le message dans la base de données
             const savedMessage = await newMessage.save();
 
-            res.status(201).json({ message: 'Message envoyé avec succès', data: savedMessage, status: 'OK' });
+            res.status(201).json({message: 'Message envoyé avec succès', data: savedMessage, status: 'OK'});
         } catch (err) {
             console.error('Erreur lors de l\'envoi du message:', err); // Ajoutez un log d'erreur pour plus de détails
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
     // Ajouter un like
     async addLike(req, res) {
         try {
-            const { postId, compteId } = req.body;
+            const {postId, compteId} = req.body;
 
             // Vérifier si un like existe déjà pour le même post et compte
-            const existingLike = await Like.findOne({ post_id: postId, compte_id: compteId });
+            const existingLike = await Like.findOne({post_id: postId, compte_id: compteId});
             if (existingLike) {
                 if (existingLike.etat === 'like') {
-                    return res.status(400).json({ message: 'Le like est déjà enregistré', status: 'KO' });
+                    return res.status(400).json({message: 'Le like est déjà enregistré', status: 'KO'});
                 } else {
                     // Changer de dislike à like
                     existingLike.etat = 'like';
@@ -371,9 +424,13 @@ class ClientController {
                     await existingLike.save();
 
                     // Décrémenter le compteur de dislikes et incrémenter celui de likes
-                    await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1, dislikeCount: -1 } });
+                    await Post.findByIdAndUpdate(postId, {$inc: {likeCount: 1, dislikeCount: -1}});
 
-                    return res.status(200).json({ message: 'État changé de dislike à like', data: existingLike, status: 'OK' });
+                    return res.status(200).json({
+                        message: 'État changé de dislike à like',
+                        data: existingLike,
+                        status: 'OK'
+                    });
                 }
             }
 
@@ -388,26 +445,28 @@ class ClientController {
 
             const savedLike = await newLike.save();
 
-            // Incrémenter le compteur de likes
-            await Post.findByIdAndUpdate(postId, { $inc: { likeCount: 1 } });
+            await Post.findByIdAndUpdate(postId, {
+                $inc: { likeCount: 1 },
+                $addToSet: { like_ids: savedLike._id }
+            });
 
-            res.status(201).json({ message: 'Like ajouté avec succès', data: savedLike, status: 'OK' });
+            res.status(201).json({message: 'Like ajouté avec succès', data: savedLike, status: 'OK'});
 
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
     // Ajouter un dislike
     async addDislike(req, res) {
         try {
-            const { postId, compteId } = req.body;
+            const {postId, compteId} = req.body;
 
             // Vérifier si un dislike existe déjà pour le même post et compte
-            const existingLike = await Like.findOne({ post_id: postId, compte_id: compteId });
+            const existingLike = await Like.findOne({post_id: postId, compte_id: compteId});
             if (existingLike) {
                 if (existingLike.etat === 'dislike') {
-                    return res.status(400).json({ message: 'Le dislike est déjà enregistré', status: 'KO' });
+                    return res.status(400).json({message: 'Le dislike est déjà enregistré', status: 'KO'});
                 } else {
                     // Changer de like à dislike
                     existingLike.etat = 'dislike';
@@ -415,9 +474,13 @@ class ClientController {
                     await existingLike.save();
 
                     // Décrémenter le compteur de likes et incrémenter celui de dislikes
-                    await Post.findByIdAndUpdate(postId, { $inc: { dislikeCount: 1, likeCount: -1 } });
+                    await Post.findByIdAndUpdate(postId, {$inc: {dislikeCount: 1, likeCount: -1}});
 
-                    return res.status(200).json({ message: 'État changé de like à dislike', data: existingLike, status: 'OK' });
+                    return res.status(200).json({
+                        message: 'État changé de like à dislike',
+                        data: existingLike,
+                        status: 'OK'
+                    });
                 }
             }
 
@@ -433,41 +496,47 @@ class ClientController {
             const savedDislike = await newDislike.save();
 
             // Incrémenter le compteur de dislikes
-            await Post.findByIdAndUpdate(postId, { $inc: { dislikeCount: 1 } });
+            await Post.findByIdAndUpdate(postId, {$inc: {dislikeCount: 1}});
 
-            res.status(201).json({ message: 'Dislike ajouté avec succès', data: savedDislike, status: 'OK' });
+            res.status(201).json({message: 'Dislike ajouté avec succès', data: savedDislike, status: 'OK'});
 
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
     // Supprimer un like ou dislike (unlike)
     async removeLikeOrDislike(req, res) {
         try {
-            const { postId, compteId, etat } = req.body;
+            const {postId, compteId, etat} = req.body;
 
             // Vérifier que l'état est valide
             if (!['like', 'dislike'].includes(etat)) {
-                return res.status(400).json({ message: 'État invalide', status: 'KO' });
+                return res.status(400).json({message: 'État invalide', status: 'KO'});
             }
 
             // Supprimer l'interaction pour le post, le compte, et l'état spécifiés
-            const result = await Like.deleteOne({ post_id: postId, compte_id: compteId, etat });
+            const result = await Like.deleteOne({post_id: postId, compte_id: compteId, etat});
 
             if (result.deletedCount === 0) {
-                return res.status(404).json({ message: `${etat.charAt(0).toUpperCase() + etat.slice(1)} non trouvé`, status: 'KO' });
+                return res.status(404).json({
+                    message: `${etat.charAt(0).toUpperCase() + etat.slice(1)} non trouvé`,
+                    status: 'KO'
+                });
             }
 
             // Décrémenter le compteur de l'état supprimé
             const stateUpdate = {};
             stateUpdate[`${etat}Count`] = -1;
-            await Post.findByIdAndUpdate(postId, { $inc: stateUpdate });
+            await Post.findByIdAndUpdate(postId, {$inc: stateUpdate});
 
-            res.status(200).json({ message: `${etat.charAt(0).toUpperCase() + etat.slice(1)} supprimé avec succès`, status: 'OK' });
+            res.status(200).json({
+                message: `${etat.charAt(0).toUpperCase() + etat.slice(1)} supprimé avec succès`,
+                status: 'OK'
+            });
 
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
 
@@ -495,8 +564,8 @@ class ClientController {
         // Search in users collection
         const usersResult = await User.find({
             $or: [
-                { lastname: { $regex: regex } },
-                { firstname: { $regex: regex } }
+                {lastname: {$regex: regex}},
+                {firstname: {$regex: regex}}
             ]
         });
 
@@ -504,11 +573,15 @@ class ClientController {
         // Extract user IDs
         const userIds = await usersResult.map(user => user._id);
 
-        // Search in comptes collection using the user IDs
         const comptes = await Compte.find({
-            $or: [
-                { user_id: { $in: userIds } },
-                { identifiant: { $regex: regex } }
+            $and: [
+                {
+                    $or: [
+                        { user_id: { $in: userIds } },
+                        { identifiant: { $regex: regex } }
+                    ]
+                },
+                { etat: "active" }
             ]
         });
 
@@ -518,8 +591,8 @@ class ClientController {
 
         const posts = await Post.find({
             $or: [
-                { content: { $regex: regex } },
-                { title: { $regex: regex } }
+                {content: {$regex: regex}},
+                {title: {$regex: regex}}
             ]
         })
         if (!posts) {
@@ -546,9 +619,9 @@ class ClientController {
         await newComment.save();
 
         const post = await Post.findByIdAndUpdate(idPost, {
-            $push: { comment_ids: newComment._id },
+            $push: {comment_ids: newComment._id},
             updatedAt: new Date()
-        }, { new: true });
+        }, {new: true});
 
         if (!post) {
             return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
@@ -575,9 +648,9 @@ class ClientController {
         await newCommentResponse.save();
 
         const comment = await Comment.findByIdAndUpdate(idComment, {
-            $push: { commentResponse_ids: newCommentResponse._id },
+            $push: {commentResponse_ids: newCommentResponse._id},
             updatedAt: new Date()
-        }, { new: true });
+        }, {new: true});
 
         if (!comment) {
             return res.status(404).json({ message: 'Commentaire non trouvé', status: 'KO' });
@@ -588,18 +661,14 @@ class ClientController {
 
     async deleteComment(req, res) {
         const { idComment } = req.body;
+
         const idCompte = req.id;
 
-        const compte = await Compte.findById(idCompte);
+        const commentDelete =  await Comment.findOneAndDelete(idComment);
 
-        if (compte.role === "tailleur") {
 
-        }
-
-        const comment = await Comment.findByIdAndDelete(idComment);
-
-        if (!comment) {
-            return res.status(404).json({ message: 'Commentaire non trouvé', status: 'KO' });
+        if(!commentDelete){
+            return res.status(500).json({ message: 'Commentaire non trouvé', status: 'KO' });
         }
 
         return res.json({ message: 'Commentaire supprimé', status: 'OK' });
@@ -615,6 +684,190 @@ class ClientController {
         }
 
         return res.json({ message: 'Réponse de commentaire supprimée', status: 'OK' });
+    }
+
+    // Méthode pour incrémenter le nombre de partages
+    async ShareNb(req, res) {
+        try {
+            const { postId } = req.body; // Assurez-vous d'utiliser req.body si vous passez postId dans le corps
+
+            console.log('Received postId:', postId);
+
+            // Vérifier si l'ID est un ObjectId valide
+            if (!mongoose.Types.ObjectId.isValid(postId)) {
+                console.log('Invalid postId');
+                return res.status(400).json({ message: 'ID de post invalide', status: 'KO' });
+            }
+
+            // Rechercher le post par ID
+            const post = await Post.findById(postId);
+            if (!post) {
+                console.log('Post not found');
+                return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
+            }
+
+            // Incrémenter le nombre de partages
+            const updatedPost = await Post.findByIdAndUpdate(
+                postId,
+                { $inc: { shareNb: 1 } },
+                { new: true, fields: { shareNb: 1 } }
+            );
+
+            if (!updatedPost) {
+                return res.status(404).json({ message: 'Post non trouvé après mise à jour', status: 'KO' });
+            }
+
+            console.log('Share count updated:', updatedPost.shareNb);
+
+            // Retourner la nouvelle valeur de shareNb
+            return res.status(200).json({
+                message: 'Partage réussi.',
+                data: { shareNb: updatedPost.shareNb },
+                status: 'OK',
+            });
+        } catch (error) {
+            console.error('Error during sharing:', error);
+            return res.status(500).json({ message: 'Erreur lors du partage.', error: error.message, status: 'KO' });
+        }
+    }
+
+    async ViewsNb(req, res) {
+        try {
+            const { postId } = req.body; // Assurez-vous d'utiliser req.body si vous passez postId dans le corps
+
+            console.log('Received postId:', postId);
+
+            // Vérifier si l'ID est un ObjectId valide
+            if (!mongoose.Types.ObjectId.isValid(postId)) {
+                console.log('Invalid postId');
+                return res.status(400).json({ message: 'ID de post invalide', status: 'KO' });
+            }
+
+            // Rechercher le post par ID
+            const post = await Post.findById(postId);
+            if (!post) {
+                console.log('Post not found');
+                return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
+            }
+
+            // Incrémenter le nombre de partages
+            const updatedPost = await Post.findByIdAndUpdate(
+                postId,
+                { $inc: { viewsNb: 1 } },
+                { new: true, fields: { viewsNb: 1 } }
+            );
+
+            if (!updatedPost) {
+                return res.status(404).json({ message: 'Post non trouvé après mise à jour', status: 'KO' });
+            }
+
+        return res.json({ message: 'Commentaire supprimé', status: 'OK' });
+    }
+
+
+    async createCommande(req, res) {
+        try {
+            const { tissuPostId, clientId } = req.body;
+
+            // Vérifions si l'identifiant du tissuPost est valide
+            if (!mongoose.Types.ObjectId.isValid(tissuPostId)) {
+                // console.log('tissuPostId:', tissuPostId);
+                return res.status(400).json({ message: 'ID de TissuPost invalide', status: 'KO' });
+            }
+
+            // Vérifioons si l'identifiant du client est valide
+            const tissuPosts = await TissuPost.findById(tissuPostId).exec();
+            console.log(tissuPostId);
+            if (!tissuPosts) {
+                return res.status(404).json({ message: 'TissuPost non trouvé', status: 'KO' });
+            }
+
+            const newCommande = new Commande({
+                tissupost_id: tissuPostId,
+                client_id: clientId,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+
+            // Enregistrez la nouvelle commande dans la base de données
+            await newCommande.save();
+
+            return res.status(201).json({ message: 'Commande créée avec succès', commande: newCommande, status: 'OK' });
+
+        } catch (error) {
+            return res.status(500).json({ message: error.message, status: 'KO' });
+        }
+    }
+
+
+    async follow(req,res) {
+        const {idFollowedCompte} = req.body;
+        const idCompte = req.id;
+
+        if (!idFollowedCompte) {
+            return res.status(400).json({message: 'ID de compte à suivre est obligatoire', status: 'KO'});
+        }
+
+        const follow = Follow.create({
+            followed_id: idFollowedCompte,
+            follower_id: idCompte
+        })
+
+        if(!follow) {
+            return res.status(500).json({ message: 'Le follow à échoué', status: 'KO'});
+        }
+
+        const followed = await Compte.findByIdAndUpdate(idFollowedCompte, {
+            $push: {follower_ids: follow._id},
+            updatedAt: new Date()
+        }, {new: true});
+
+        const follower = await Compte.findByIdAndUpdate(idCompte, {
+            $push: {follower_ids: follow._id},
+            updatedAt: new Date()
+        }, {new: true});
+
+        return res.json({message:'Vous avez suivi l\'utilisateur', status: 'OK'});
+    }
+
+    async addMeasure(req, res) {
+        try {
+            const { Epaule, Manche, Longueur, Poitrine, Fesse, Taille, Cou } = req.body;
+    
+            // Vérifiez si tous les champs sont présents et sont des nombres
+            const fields = { Epaule, Manche, Longueur, Poitrine, Fesse, Taille, Cou };
+            for (const [key, value] of Object.entries(fields)) {
+                if (value === undefined) {
+                    return res.status(400).json({ message: `${key} is required` });
+                }
+                if (isNaN(value) || value < 0) {
+                    return res.status(400).json({ message: `${key} must be a positive number` });
+                }
+            }
+    
+            // Vérifiez si l'utilisateur est authentifié
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({ message: "User not authenticated" });
+            }
+            const compte_id = req.user.id;
+    
+            const newMeasure = new Measure({
+                ...fields,
+                compte_id
+            });
+    
+            const savedMeasure = await newMeasure.save();
+    
+            // Mise à jour du client avec la nouvelle mesure
+            await Client.findOneAndUpdate(
+                { compte_id: compte_id },
+                { $push: { measure_ids: savedMeasure._id } }
+            );
+    
+            res.status(201).json({ message: "Measure added successfully", measure: savedMeasure });
+        } catch (error) {
+            res.status(500).json({ message: "Error adding measure", error: error.message });
+        }
     }
 
     //fonction pour ajouter la note d'un compte
@@ -638,8 +891,209 @@ class ClientController {
             return res.status(500).json({ error: error.message });
         }
     }
-
     
+    // Exemple de fonction pour récupérer les notifications d'un utilisateur
+    async getNotificationsForUser(req, res) {
+        const userId = req.id;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'ID utilisateur manquant' });
+        }
+
+        try {
+            // Recherchez toutes les notifications associées au compte de l'utilisateur
+            const notifications = await Notification.find({ compte_id: userId }).exec();
+            // .populate('post_id')
+            // console.log(notifications);
+            // Retourner les notifications trouvées
+            return res.status(200).json(notifications);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des notifications :', error);
+            return res.status(500).json({ error: 'Erreur serveur' });
+        }
+    }
+
+    async getClientMeasures(req, res) {
+        try {
+            const userId = req.id;
+    
+            // Valider l'ID du client
+            if (!userId) {
+                return res.status(400).json({ message: 'ID du client invalide', status: 'KO' });
+            }
+    
+            // Trouver les mesures du client en utilisant l'ID du compte
+            const measures = await Measure.find({ compte_id: userId }).exec();
+    
+            // console.log(measures);
+    
+            if (!measures.length) {
+                return res.status(404).json({ message: 'Aucune mesure trouvée pour ce client', status: 'KO' });
+            }
+    
+            return res.status(200).json(measures);
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }    
+
+    async getPostById(req, res) {
+    try {
+        const postId = req.params.id; // Assurez-vous que l'ID provient du bon endroit
+        console.log(`Received Post ID: ${postId}`);
+
+        // Valider l'ID du post
+        if (!mongoose.Types.ObjectId.isValid(postId)) {
+            return res.status(400).json({ message: 'ID de post invalide', status: 'KO' });
+        }
+
+        // Trouver le post par ID
+        const post = await Post.findById(postId).populate('author_id').lean();
+        if (!post) {
+            return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
+        }
+
+        // Retourner le post
+        return res.status(200).json({ post, status: 'OK' });
+    } catch (err) {
+        return res.status(500).json({ message: 'Erreur interne du serveur', status: 'KO' });
+    }
+} 
+
+    async getSomeProfile(req, res){
+        const {identifiant} = req.params.identifiant;
+        const idCompte = req.id;
+        const monCompte = await Compte.findById(idCompte);
+
+        const compte = await Compte.findOne({identifiant});
+        const user = await User.findOne({_id: compte.user_id});
+        let isMyFollower = false;
+        let searhIfFollower = null;
+
+        if(monCompte.role === 'tailleur'){
+            searhIfFollower = await Follow.findOne({
+                $or: [
+                    {
+                        follower_id: idCompte,
+                        followed_id: compte._id
+                    },
+                    {
+                        follower_id: compte._id,
+                        followed_id: idCompte
+                    },
+                ]
+            })
+        }else{
+            searhIfFollower = await Follow.findOne({
+                follower_id: idCompte,
+                followed_id: compte._id
+            })
+        }
+
+        isMyFollower = searhIfFollower ? true : false;
+
+
+        if(compte.role === 'tailleur') {
+            const tailleur = await Tailleur.findOne({compte_id: compte._id});
+
+            const posts = await Post.find({author_id: tailleur._id});
+
+            return res.json({user, compte, posts,isMyFollower, message: "Profile de l'utilisateur", status: 'OK'});
+        }
+        if (compte.role === 'client'){
+            const posts = await compte.find()
+                .populate({
+                    path: 'follower_ids',
+                    populate: {
+                        path: 'followed_id',
+                        match: {etat: 'active'}
+                    }
+                })
+                .populate({
+                    path: 'compte_id',
+                    model: 'Tailleur'
+                })
+                .populate({
+                    path: 'author_id',
+                    model: 'Post',
+                    options: {sort: {createdAt: -1}}
+                });
+            return res.json({user, compte, posts,isMyFollower, message: "Profile de l'utilisateur" , status: 'OK'});
+        }
+    }
+
+
+
+    async bloquer(req, res) {
+  
+        try {
+            const { userIdToBlock } = req.body;  // L'ID de l'utilisateur à bloquer
+             const tailleurId = req.id;  // L'ID de l'utilisateur connecté (doit être un tailleur)
+                
+            // Vérifier si le tailleur est connecté
+            const tailleur = await Compte.findById(tailleurId).populate('role');
+            if (!tailleur || tailleur.role !== 'tailleur') {
+                return res.status(403).json({ message: "Accès refusé. Seuls les tailleurs peuvent bloquer des utilisateurs.", status: 'KO' });
+            }
+    
+            // Vérifier si l'utilisateur à bloquer est un tailleur ou un client suivi par le tailleur
+            const userToBlock = await Compte.findById(userIdToBlock);
+    
+            if (!userToBlock) {
+                return res.status(404).json({ message: "Utilisateur à bloquer introuvable.", status: 'KO' });
+    
+            }
+    
+            
+    
+            // Vérifier si le tailleur suit l'utilisateur à bloquer
+            const isFollowed = tailleur.follower_ids.some(followerId => followerId.toString() === userIdToBlock);
+            if (!isFollowed) {
+                return res.status(403).json({ message: "Vous ne pouvez bloquer que des utilisateurs que vous suivez.", status: 'KO' });
+            }
+    
+            // Créer l'enregistrement de blocage
+            const newBloquer = new Bloquer({
+                blocker_id: tailleurId,
+                blocked_id: userIdToBlock,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+    
+            await newBloquer.save();
+    
+            res.status(200).json({ message: "L'utilisateur a été bloqué avec succès.", status: 'OK' });
+        } catch (error) {
+            console.error('Erreur lors du blocage de l\'utilisateur:', error);
+            res.status(500).json({ message: 'Erreur lors du blocage de l\'utilisateur', status: 'KO' });
+        }
+    }
+   
 }
 
 export default new ClientController();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

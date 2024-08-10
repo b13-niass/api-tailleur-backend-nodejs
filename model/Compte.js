@@ -7,8 +7,8 @@ const CompteSchema = new Schema({
     password: String,
     etat: String,
     role: String,
-    createdAt: Date,
-    updatedAt: Date,
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
     identifiant: String,
     bio: String,
     credit: Number,
@@ -29,7 +29,5 @@ CompteSchema.statics.signalerCompte = async function(compte_id) {
         throw new Error('Erreur lors de la signalation du compte');
     }
 };
-
-
 
 export default mongoose.model('Compte', CompteSchema);
