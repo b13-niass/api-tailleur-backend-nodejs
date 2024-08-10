@@ -9,3 +9,12 @@ router.route('/login').post(authController.login);
 router.route('/logout').get(authController.logout);
 
 export {router};
+
+//
+// {
+//     "files":"video.png",
+//       "description":"Ceci est un modele",
+//        "duration":"24", 
+//        "viewsNB":"0",
+//         "categories":"video"
+//  }

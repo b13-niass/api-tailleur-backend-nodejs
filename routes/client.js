@@ -32,6 +32,7 @@ router.route('/accueil/posts/:id', ).get(clientController.getPostById);
 
 router.route('/profile').get(clientController.userProfile);
 
+
 // Routes pour les statuts
 router.route('/status')
     .get(clientController.listStatus);
@@ -77,6 +78,14 @@ router.route('/accueil/search').post(clientController.accueilSearch);
 router.route('/posts/comment').post(clientController.ajoutComment).delete(clientController.deleteComment);
 router.route('/posts/comment/reponse').post(clientController.reponseComment).delete(clientController.deleteResponseComment);
 
+// route pour enregistrer mesure
+router.route('/mesure').post(clientController.addMeasure);
+router.route('/share').post(clientController.ShareNb);
+router.route('/view').post(clientController.ViewsNb);
+router.post('/commandes',clientController.createCommande);
+
+router.route('/follow').post(clientController.follow);
+
+router.route('/profile/:identifiant').get(clientController.getSomeProfile);
 
 export { router };
-
