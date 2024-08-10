@@ -13,6 +13,8 @@ import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import Comment from "../model/Comment.js";
 import CommentResponse from "../model/CommentResponse.js";
+import Follow from '../model/Notification.js';
+import Measure from '../model/Measure.js';
 import "dotenv/config";
 
 class ClientController {
@@ -292,10 +294,12 @@ async getFavoriteById(req, res) {
     
             // Répondre avec les données trouvées
             res.status(200).json({
+
                 // compte,
                 // user,
                 // posts,
                 // role: compte.role
+
                 compte: {
                     role: compte.role,
                     etat: compte.etat,
@@ -638,6 +642,54 @@ async getFavoriteById(req, res) {
 
         return res.json({message: 'Réponse de commentaire supprimée', status: 'OK'});
     }
+
+    
+    // Exemple de fonction pour récupérer les notifications d'un utilisateur
+    async getNotificationsForUser(req, res) {
+        const userId = req.id;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'ID utilisateur manquant' });
+        }
+
+        try {
+            // Recherchez toutes les notifications associées au compte de l'utilisateur
+            const notifications = await Notification.find({ compte_id: userId }).exec();
+            // .populate('post_id')
+            // console.log(notifications);
+            // Retourner les notifications trouvées
+            return res.status(200).json(notifications);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des notifications :', error);
+            return res.status(500).json({ error: 'Erreur serveur' });
+        }
+    }
+
+    async getClientMeasures(req, res) {
+        try {
+            const userId = req.id;
+    
+            // Valider l'ID du client
+            if (!userId) {
+                return res.status(400).json({ message: 'ID du client invalide', status: 'KO' });
+            }
+    
+            // Trouver les mesures du client en utilisant l'ID du compte
+            const measures = await Measure.find({ compte_id: userId }).exec();
+    
+            // console.log(measures);
+    
+            if (!measures.length) {
+                return res.status(404).json({ message: 'Aucune mesure trouvée pour ce client', status: 'KO' });
+            }
+    
+            return res.status(200).json(measures);
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }    
+
+
 }
 
 export default new ClientController();

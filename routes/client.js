@@ -3,7 +3,9 @@ import clientController from "../controller/ClientController.js";
 import tailleurController from "../controller/TailleurController.js";
 import { isAuthenticatedGlobal } from "../middleware/auth.js";
 
+
 const router = express.Router();
+
 
 router.use(isAuthenticatedGlobal); // Utilisez le middleware pour toutes les routes
 
@@ -18,7 +20,12 @@ router.route('/accueil')
  router.route('/posts')
     .get(tailleurController.listMyAllPosts)
     .post(tailleurController.createPost);
- 
+
+// Définir la route GET pour récupérer les notifications
+router.route('/notifications').get(clientController.getNotificationsForUser);
+
+router.route('/measures').get(clientController.getClientMeasures.bind(clientController));
+
 
 // Routes pour les statuts
 router.route('/status')

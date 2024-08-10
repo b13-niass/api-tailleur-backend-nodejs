@@ -56,58 +56,58 @@ class TailleurController {
             res.status(500).json({ message: error.message, status: 'KO' });
         }
     }
-async createPost(req, res) {
-    try{
-            const idTailleur = req.id;
+    async createPost(req, res) {
+        try{
+                const idTailleur = req.id;
 
-            // Valider les champs
-            const { content, title, image } = req.body;
+                // Valider les champs
+                const { content, title, image } = req.body;
 
-            if (!content || typeof content !== 'string') {
-                return res.status(400).json({ message: "Content must be a non-empty string", status: 'KO' });
+                if (!content || typeof content !== 'string') {
+                    return res.status(400).json({ message: "Content must be a non-empty string", status: 'KO' });
+                }
+
+                if (!title || typeof title !== 'string') {
+                    return res.status(400).json({ message: "Title must be a non-empty string", status: 'KO' });
+                }
+
+                if (!image || !Array.isArray(image) || image.length === 0) {
+                    return res.status(400).json({ message: "Image must be a non-empty array", status: 'KO' });
+                }
+
+                const validCategories = ['video', 'image'];
+                if (!image.every(item => validCategories.includes(item))) {
+                    return res.status(400).json({ message: "Image array must only contain 'video' or 'image'", status: 'KO' });
+                }
+
+                // Créer le post
+                const newPost = new Post({
+                    content,
+                    title,
+                    image,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    shareNb: 0,
+                    viewsNb: 0,
+                    author_id: idTailleur
+                });
+
+                await newPost.save();
+
+                // Récupérer le tailleur et ajouter le post à sa liste de posts
+                const tailleur = await Tailleur.findOne({ compte_id: idTailleur });
+                if (!tailleur) {
+                    return res.status(404).json({ message: "Tailleur not found", status: 'KO' });
+                }
+
+                tailleur.post_ids.push(newPost._id);
+                await tailleur.save();
+
+                res.status(201).json({ message: "Post created successfully", status: 'OK', post: newPost });
+            } catch (err) {
+                return res.status(500).json({message: err.message, status: 'oooKO'});
             }
-
-            if (!title || typeof title !== 'string') {
-                return res.status(400).json({ message: "Title must be a non-empty string", status: 'KO' });
-            }
-
-            if (!image || !Array.isArray(image) || image.length === 0) {
-                return res.status(400).json({ message: "Image must be a non-empty array", status: 'KO' });
-            }
-
-            const validCategories = ['video', 'image'];
-            if (!image.every(item => validCategories.includes(item))) {
-                return res.status(400).json({ message: "Image array must only contain 'video' or 'image'", status: 'KO' });
-            }
-
-            // Créer le post
-            const newPost = new Post({
-                content,
-                title,
-                image,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                shareNb: 0,
-                viewsNb: 0,
-                author_id: idTailleur
-            });
-
-            await newPost.save();
-
-            // Récupérer le tailleur et ajouter le post à sa liste de posts
-            const tailleur = await Tailleur.findOne({ compte_id: idTailleur });
-            if (!tailleur) {
-                return res.status(404).json({ message: "Tailleur not found", status: 'KO' });
-            }
-
-            tailleur.post_ids.push(newPost._id);
-            await tailleur.save();
-
-            res.status(201).json({ message: "Post created successfully", status: 'OK', post: newPost });
-        } catch (err) {
-            return res.status(500).json({message: err.message, status: 'oooKO'});
         }
-    }
 
   
     async updatePost(req, res) {
