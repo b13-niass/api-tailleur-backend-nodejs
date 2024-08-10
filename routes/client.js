@@ -68,6 +68,9 @@ router.route('/accueil/search').post(clientController.accueilSearch);
 router.route('/posts/comment').post(clientController.ajoutComment).delete(clientController.deleteComment);
 router.route('/posts/comment/reponse').post(clientController.reponseComment).delete(clientController.deleteResponseComment);
 
+router.route('/follow').post(clientController.follow);
+
+router.route('/profile/:identifiant').get(clientController.getSomeProfile);
 
 export { router };
 
