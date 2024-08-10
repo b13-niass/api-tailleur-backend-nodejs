@@ -689,6 +689,29 @@ async getFavoriteById(req, res) {
         }
     }    
 
+    async getPostById(req, res) {
+    try {
+        const postId = req.params.id; // Assurez-vous que l'ID provient du bon endroit
+        console.log(`Received Post ID: ${postId}`);
+
+        // Valider l'ID du post
+        if (!mongoose.Types.ObjectId.isValid(postId)) {
+            return res.status(400).json({ message: 'ID de post invalide', status: 'KO' });
+        }
+
+        // Trouver le post par ID
+        const post = await Post.findById(postId).populate('author_id').lean();
+        if (!post) {
+            return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
+        }
+
+        // Retourner le post
+        return res.status(200).json({ post, status: 'OK' });
+    } catch (err) {
+        return res.status(500).json({ message: 'Erreur interne du serveur', status: 'KO' });
+    }
+} 
+    
 
 }
 

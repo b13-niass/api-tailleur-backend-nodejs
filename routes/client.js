@@ -2,15 +2,13 @@ import express from "express";
 import clientController from "../controller/ClientController.js";
 import tailleurController from "../controller/TailleurController.js";
 import { isAuthenticatedGlobal } from "../middleware/auth.js";
+import { isClientAuthenticated } from "../middleware/authClient.js";
 
 
 const router = express.Router();
 
 
 router.use(isAuthenticatedGlobal); // Utilisez le middleware pour toutes les routes
-
-// Route pour afficher le profil du client
-router.get('/profile', clientController.showClientProfile);
 
 // Route pour le fil d'actualité
 router.route('/accueil')
@@ -26,6 +24,13 @@ router.route('/notifications').get(clientController.getNotificationsForUser);
 
 router.route('/measures').get(clientController.getClientMeasures.bind(clientController));
 
+// Route pour afficher le profil du client
+router.route('/profile').get(clientController.showClientProfile);
+
+router.route('/profile/posts/:id').get(clientController.getPostById);
+router.route('/accueil/posts/:id', ).get(clientController.getPostById);
+
+router.route('/profile').get(clientController.userProfile);
 
 // Routes pour les statuts
 router.route('/status')
@@ -67,8 +72,6 @@ router.route('/dislike').post(clientController.addDislike);
 
 // Route pour supprimer un like ou un dislike
 router.route('/unlike').delete(clientController.removeLikeOrDislike);
-
-router.route('/profile').get(clientController.userProfile);
 
 router.route('/accueil/search').post(clientController.accueilSearch);
 router.route('/posts/comment').post(clientController.ajoutComment).delete(clientController.deleteComment);
