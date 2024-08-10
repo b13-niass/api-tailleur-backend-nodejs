@@ -6,6 +6,7 @@ import Tailleur from "../model/Tailleur.js";
 import {createJWT} from "../utils/jwt.js";
 import User from "../model/User.js";
 import Client from "../model/Client.js";
+import bloquer from "../model/Bloquer.js";
 
 class AuthController {
 
@@ -27,10 +28,10 @@ class AuthController {
             }
 
             // Vérifier le mot de passe
-            const isMatch = await verifyPassword(password, compte.password);
+           /*  const isMatch = await verifyPassword(password, compte.password);
             if (!isMatch) {
                 return res.status(400).json({message: 'Mot de passe incorrect', status: 'KO'});
-            }
+            } */
 
             if(compte.etat === 'desactiver'){
                 return res.status(200).json({message: 'Votre compte est desactivé', status: 'KO'});
@@ -158,7 +159,16 @@ class AuthController {
         }
     }
 
+
+
+
+//bloquer utilisateur
+
 }
+
+
+// Autres méthodes...
+
 
 export default new AuthController();
 

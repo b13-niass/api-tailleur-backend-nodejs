@@ -20,6 +20,8 @@ db.reports.drop();
 db.status.drop();
 db.tailleurs.drop();
 db.users.drop();
+db.bloquers.drop(); // Drop the Bloquer collection if it exists
+
 
 // Create Collections
 db.createCollection("clients");
@@ -38,6 +40,8 @@ db.createCollection("notes");
 db.createCollection("notifications");
 db.createCollection("reports");
 db.createCollection("users");
+db.createCollection("bloquers"); // Create the Bloquer collection
+
 
 // Insert Users
 var userId1 = ObjectId();
@@ -619,7 +623,12 @@ db.notifications.insertMany([
         updatedAt: new Date(),
     },
 ]);
-
+// Insert Bloquer
+db.bloquers.insertMany([
+    { blocked_id: compteId2, blocker_id: compteId1, createdAt: new Date(), updatedAt: new Date() },
+    { blocked_id: compteId4, blocker_id: compteId3, createdAt: new Date(), updatedAt: new Date() },
+    { blocked_id: compteId5, blocker_id: compteId1, createdAt: new Date(), updatedAt: new Date() }
+]);
 // Insert Reports
 var reportId1 = ObjectId();
 var reportId2 = ObjectId();

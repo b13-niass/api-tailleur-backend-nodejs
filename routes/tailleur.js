@@ -9,11 +9,11 @@ const router = express.Router();
 // Middleware pour vérifier l'authentification
 router.use(isTailleurAuthenticated);
 
-router.route('/status').get(tailleurController.listMyAllPosts).post(tailleurController.createStatus);
+router.route('/status').get(tailleurController.listStatus).post(tailleurController.createStatus);
 
-router.route('/posts').post(tailleurController.createPost);
+router.route('/posts').post(tailleurController.createPost).get(tailleurController.listMyAllPosts);
 router.route('/posts/:postId').put(tailleurController.updatePost).delete(tailleurController.deletePost);
-
+// Routes pour les statuts
 
 
 export {router};

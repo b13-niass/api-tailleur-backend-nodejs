@@ -15,7 +15,7 @@ router.route('/accueil')
     .get(clientController.getNewsFeed); // Route pour obtenir le fil d'actualité
 
 // Routes pour les posts
- router.route('/posts')
+ router.route('/posts/:id')
     .get(tailleurController.listMyAllPosts)
     .post(tailleurController.createPost);
 
@@ -35,7 +35,8 @@ router.route('/profile').get(clientController.userProfile);
 
 // Routes pour les statuts
 router.route('/status')
-    .get(clientController.listStatus);
+    .get(tailleurController.listStatus)
+    .post(tailleurController.createStatus);
 
 // Routes pour les messages
 
@@ -53,7 +54,7 @@ router.route('/favorites/:id')
 // Route pour créer un compte
 router.route('/compte')
     .post(clientController.createAccount);
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 router.route('/compte')
     .get(clientController.getAccount);
 
@@ -85,6 +86,9 @@ router.route('/view').post(clientController.ViewsNb);
 router.post('/commandes',clientController.createCommande);
 
 router.route('/follow').post(clientController.follow);
+
+router.route('/bloquer').post(isAuthenticatedGlobal, clientController.bloquer);
+
 
 router.route('/profile/:identifiant').get(clientController.getSomeProfile);
 

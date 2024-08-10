@@ -18,5 +18,6 @@ export const isTailleurAuthenticated = (req, res, next) => {
         }else {
             res.status(403).json({message: 'No Authorization', status: 'KO'});
         }
+        
     })
 }
