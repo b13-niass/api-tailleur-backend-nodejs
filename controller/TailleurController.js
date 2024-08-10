@@ -8,8 +8,8 @@ import TissuPost from "../model/TissuPost.js";
 class TailleurController {
     async listMyAllPosts(req, res) {
         try {
-            const { tailleurId } = req.params; // Suppose que l'ID du tailleur est passé en paramètre
-
+            const tailleurId = req.id; // Supposons que l'ID du tailleur est passé en paramètre
+        
             // Assurez-vous que l'ID est valide
             if (!mongoose.Types.ObjectId.isValid(tailleurId)) {
                 return res.status(400).json({ message: 'ID de tailleur invalide', status: 'KO' });
@@ -37,7 +37,7 @@ class TailleurController {
 
             // Vérifiez si l'ID est valide
             if (!mongoose.Types.ObjectId.isValid(tailleurId)) {
-                
+
                 return res.status(400).json({ message: 'ID de tailleur invalide', status: 'KO' });
             }
             // return res.json(files);
@@ -120,7 +120,6 @@ async createPost(req, res) {
                 updatedAt: new Date()
             });
             await newTissuPost.save();
-
             await Post.findByIdAndUpdate(newPost._id, {
                 $push: {
                     tissus: {
@@ -131,11 +130,6 @@ async createPost(req, res) {
                     }
                 }
             });
-        }
-
-        // Ajouter le post à la liste des posts du tailleur
-        tailleur.post_ids.push(newPost._id);
-        await tailleur.save();
 
         res.status(201).json({ message: "Post created successfully", status: 'OK', post: newPost });
     } catch (err) {
@@ -201,7 +195,6 @@ async createPost(req, res) {
         }
 
 
-
     async deletePost(req, res) {
         try {
             const { postId } = req.params;
@@ -223,7 +216,7 @@ async createPost(req, res) {
             );
             res.status(200).json({ message: "Post deleted successfully", status: 'OK' });
         } catch (err) {
-            return res.status(500).json({message: err.message, status: 'KO'});
+            return res.status(500).json({ message: err.message, status: 'KO' });
         }
     }
 

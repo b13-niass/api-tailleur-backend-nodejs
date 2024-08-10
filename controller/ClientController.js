@@ -13,6 +13,7 @@ import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import Comment from "../model/Comment.js";
 import CommentResponse from "../model/CommentResponse.js";
+import Measure from '../model/Measure.js';
 
 import Measure from "../model/Measure.js";
 import TissuPost from '../model/TissuPost.js';
@@ -257,46 +258,58 @@ class ClientController {
         try {
             const idUser = req.id;
             console.log("User ID: ", idUser);
-
+    
             // Trouver le compte par ID
             const compte = await Compte.findById(idUser).exec();
             if (!compte) {
                 return res.status(404).json({message: 'Compte not found', status: 'KO'});
             }
             console.log("Compte trouvé: ", compte);
-
+    
             // Récupérer le user_id depuis le compte
             const userId = compte.user_id;
             if (!userId) {
                 return res.status(404).json({message: 'User ID not found in compte', status: 'KO'});
             }
-
+    
             // Trouver les informations de l'utilisateur en utilisant user_id
             const user = await User.findById(userId).exec();
             if (!user) {
                 return res.status(404).json({message: 'User not found', status: 'KO'});
             }
             console.log("Utilisateur trouvé: ", user);
-
+    
             let posts = [];
-
+    
             if (compte.role === 'tailleur') {
-                const tailleur = await Tailleur.findOne({compte_id: compte._id}).exec();
+                // Si le compte est un tailleur, récupérer ses posts
+                const tailleur = await Tailleur.findOne({ compte_id: compte._id }).exec();
+
                 if (tailleur) {
                     posts = await Post.find({_id: {$in: tailleur.post_ids}}).exec();
                 } else {
                     throw new Error('Tailleur not found');
                 }
             } else if (compte.role === 'client') {
+
                 const client = await Client.findOne({compte_id: compte._id}).exec();
                 if (client && client.followClient_ids.length > 0) {
                     const followClients = await FollowClient.find({client_id: client._id}).exec();
                     const followedClientIds = followClients.map(follow => follow.followed_client_id);
-
+    
+                    // Trouver les tailleurs suivis avec des comptes actifs
                     const tailleurs = await Tailleur.find({ compte_id: { $in: followedClientIds } }).exec();
-                    const tailleurIds = tailleurs.map(tailleur => tailleur._id);
-
-                    posts = await Post.find({ author_id: { $in: tailleurIds } }).exec();
+                    const activeTailleurIds = [];
+    
+                    for (const tailleur of tailleurs) {
+                        const compteSuivi = await Compte.findById(tailleur.compte_id).exec();
+                        if (compteSuivi && compteSuivi.etat === 'active') {
+                            activeTailleurIds.push(tailleur._id);
+                        }
+                    }
+    
+                    // Récupérer les posts des tailleurs actifs
+                    posts = await Post.find({ author_id: { $in: activeTailleurIds } }).exec();
                 }
             } else {
                 throw new Error('Unknown role');
@@ -304,8 +317,22 @@ class ClientController {
 
             // Répondre avec les données trouvées
             res.status(200).json({
-                compte,
-                user,
+
+                // compte,
+                // user,
+                // posts,
+                // role: compte.role
+
+                compte: {
+                    role: compte.role,
+                    etat: compte.etat,
+                },
+                user: {
+                    lastname: user.lastname,
+                    firstname: user.firstname,
+                    city: user.city,
+                    picture: user.picture,
+                },
                 posts,
                 role: compte.role
             });
@@ -314,8 +341,9 @@ class ClientController {
             res.status(500).json({message: 'Internal server error', status: 'KO'});
         }
     }
+      
+   // Récupérer tous les messages d'un client (utilisateur)
 
-    // Récupérer tous les messages d'un client (utilisateur)
     async getAllMessages(req, res) {
         try {
             const clientId = req.params.clientId || req.body.clientId || req.id;
@@ -849,6 +877,74 @@ class ClientController {
         }
     }
 
+    
+    // Exemple de fonction pour récupérer les notifications d'un utilisateur
+    async getNotificationsForUser(req, res) {
+        const userId = req.id;
+
+        if (!userId) {
+            return res.status(400).json({ error: 'ID utilisateur manquant' });
+        }
+
+        try {
+            // Recherchez toutes les notifications associées au compte de l'utilisateur
+            const notifications = await Notification.find({ compte_id: userId }).exec();
+            // .populate('post_id')
+            // console.log(notifications);
+            // Retourner les notifications trouvées
+            return res.status(200).json(notifications);
+        } catch (error) {
+            console.error('Erreur lors de la récupération des notifications :', error);
+            return res.status(500).json({ error: 'Erreur serveur' });
+        }
+    }
+
+    async getClientMeasures(req, res) {
+        try {
+            const userId = req.id;
+    
+            // Valider l'ID du client
+            if (!userId) {
+                return res.status(400).json({ message: 'ID du client invalide', status: 'KO' });
+            }
+    
+            // Trouver les mesures du client en utilisant l'ID du compte
+            const measures = await Measure.find({ compte_id: userId }).exec();
+    
+            // console.log(measures);
+    
+            if (!measures.length) {
+                return res.status(404).json({ message: 'Aucune mesure trouvée pour ce client', status: 'KO' });
+            }
+    
+            return res.status(200).json(measures);
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }    
+
+    async getPostById(req, res) {
+    try {
+        const postId = req.params.id; // Assurez-vous que l'ID provient du bon endroit
+        console.log(`Received Post ID: ${postId}`);
+
+        // Valider l'ID du post
+        if (!mongoose.Types.ObjectId.isValid(postId)) {
+            return res.status(400).json({ message: 'ID de post invalide', status: 'KO' });
+        }
+
+        // Trouver le post par ID
+        const post = await Post.findById(postId).populate('author_id').lean();
+        if (!post) {
+            return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
+        }
+
+        // Retourner le post
+        return res.status(200).json({ post, status: 'OK' });
+    } catch (err) {
+        return res.status(500).json({ message: 'Erreur interne du serveur', status: 'KO' });
+    }
+} 
 
     async getSomeProfile(req, res){
         const {identifiant} = req.params.identifiant;
@@ -911,7 +1007,6 @@ class ClientController {
             return res.json({user, compte, posts,isMyFollower, message: "Profile de l'utilisateur" , status: 'OK'});
         }
     }
-
 
 }
 
