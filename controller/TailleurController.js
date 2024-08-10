@@ -226,6 +226,35 @@ async createPost(req, res) {
             return res.status(500).json({message: err.message, status: 'KO'});
         }
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 export default new TailleurController();
