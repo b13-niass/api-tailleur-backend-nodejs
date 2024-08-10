@@ -163,50 +163,6 @@ class AuthController {
 
 
 //bloquer utilisateur
-async bloquer(req, res) {
-  
-    try {
-        const { userIdToBlock } = req.body;  // L'ID de l'utilisateur à bloquer
-         const tailleurId = req.id;  // L'ID de l'utilisateur connecté (doit être un tailleur)
-            
-        // Vérifier si le tailleur est connecté
-        const tailleur = await Compte.findById(tailleurId).populate('role');
-        if (!tailleur || tailleur.role !== 'tailleur') {
-            return res.status(403).json({ message: "Accès refusé. Seuls les tailleurs peuvent bloquer des utilisateurs.", status: 'KO' });
-        }
-
-        // Vérifier si l'utilisateur à bloquer est un tailleur ou un client suivi par le tailleur
-        const userToBlock = await Compte.findById(userIdToBlock);
-
-        if (!userToBlock) {
-            return res.status(404).json({ message: "Utilisateur à bloquer introuvable.", status: 'KO' });
-
-        }
-
-        
-
-        // Vérifier si le tailleur suit l'utilisateur à bloquer
-        const isFollowed = tailleur.follower_ids.some(followerId => followerId.toString() === userIdToBlock);
-        if (!isFollowed) {
-            return res.status(403).json({ message: "Vous ne pouvez bloquer que des utilisateurs que vous suivez.", status: 'KO' });
-        }
-
-        // Créer l'enregistrement de blocage
-        const newBloquer = new Bloquer({
-            blocker_id: tailleurId,
-            blocked_id: userIdToBlock,
-            createdAt: new Date(),
-            updatedAt: new Date()
-        });
-
-        await newBloquer.save();
-
-        res.status(200).json({ message: "L'utilisateur a été bloqué avec succès.", status: 'OK' });
-    } catch (error) {
-        console.error('Erreur lors du blocage de l\'utilisateur:', error);
-        res.status(500).json({ message: 'Erreur lors du blocage de l\'utilisateur', status: 'KO' });
-    }
-}
 
 }
 

@@ -70,6 +70,9 @@ router.route('/posts/comment/reponse').post(clientController.reponseComment).del
 
 router.route('/follow').post(clientController.follow);
 
+router.route('/bloquer').post(isAuthenticatedGlobal, clientController.bloquer);
+
+
 router.route('/profile/:identifiant').get(clientController.getSomeProfile);
 
 export { router };
