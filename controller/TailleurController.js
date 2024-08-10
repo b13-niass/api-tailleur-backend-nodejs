@@ -2,33 +2,13 @@ import mongoose from 'mongoose';
 import Status from '../model/Status.js';
 import Post from "../model/Post.js";
 import Tailleur from "../model/Tailleur.js";
+
+import Conversioncredit from '../model/Conversioncredit.js';
 import Compte from "../model/Compte.js";
 import follow from "../model/Follow.js";
 import TissuPost from "../model/TissuPost.js";
 
 class TailleurController {
- 
-/*     async listMyAllPosts(req, res) {
-        try {
-            const tailleurId = req.id; // Supposons que l'ID du tailleur est passé en paramètre
-        
-            // Assurez-vous que l'ID est valide
-            if (!mongoose.Types.ObjectId.isValid(tailleurId)) {
-                return res.status(400).json({ message: 'ID de tailleur invalide', status: 'KO' });
-            }
-
-            // Rechercher les statuts associés à ce tailleur
-            const statuses = await Status.find({ tailleur_id: tailleurId });
-
-            if (statuses.length === 0) {
-                return res.status(404).json({ message: 'Aucun statut trouvé', status: 'KO' });
-            }
-
-            res.status(200).json({ statuses, status: 'OK' });
-        } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
-        }
-    } */
     
     async listMyAllPosts(req, res) {
         try {
@@ -172,7 +152,7 @@ class TailleurController {
        
             return res.status(200).json({ statuses: activeStatuses, status: 'OK' });
         } catch (err) {
-            return res.status(500).json({ message: err.message, status: 'KO' });
+            return res.status(500).json({ message: err.message, status: 'oooKO' });
         }
     }
 
@@ -334,6 +314,64 @@ async createPost(req, res) {
             res.status(200).json({ message: "Post deleted successfully", status: 'OK' });
         } catch (err) {
             return res.status(500).json({ message: err.message, status: 'KO' });
+        }
+    }
+    async acheterCredit(req, res) {
+        try {
+            // Extraire les informations du corps de la requête
+            const { compteId, montant } = req.body;
+
+            console.log('Données reçues:', { compteId, montant });
+
+            // Validation du montant
+            if (typeof montant !== 'number' || montant <= 0) {
+                return res.status(400).json({ error: 'Montant invalide' });
+            }
+
+            // Calculer le crédit
+            const credit = Conversioncredit.calculateCredit(montant);
+            console.log('Crédit calculé:', credit);
+
+            // Stocker la conversion dans Conversioncredit
+            const newConversion = await Conversioncredit.create({
+                prix: montant,
+                credit,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+            console.log('Nouvelle conversion stockée:', newConversion);
+
+            // Trouver le compte
+            const compte = await Compte.findById(compteId);
+            if (!compte) {
+                return res.status(404).json({ error: 'Compte non trouvé' });
+            }
+
+            console.log('Compte trouvé:', compte);
+
+            // Vérifier si le compte est un "tailleur"
+            if (compte.role !== 'tailleur') {
+                return res.status(403).json({ error: 'Seul un tailleur peut acheter des crédits' });
+            }
+
+            // Ajouter le crédit au crédit existant
+            const updatedCompte = await Compte.findByIdAndUpdate(
+                compteId,
+                { $inc: { credit: credit } },
+                { new: true }
+            );
+            console.log('Compte mis à jour:', updatedCompte);
+
+            // Envoyer la réponse
+            res.status(200).json({ message: 'Crédit ajouté avec succès', compte: updatedCompte });
+        } catch (error) {
+            // Gérer les erreurs
+            console.error('Erreur lors de l\'achat de crédits:', error);
+            res.status(500).json({ error: 'Une erreur est survenue lors de l\'achat de crédits', details: error.message });
+        }
+    }
+    
+}
         }
     }
 

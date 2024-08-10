@@ -13,7 +13,7 @@ router.route('/status').get(tailleurController.listStatus).post(tailleurControll
 
 router.route('/posts').post(tailleurController.createPost).get(tailleurController.listMyAllPosts);
 router.route('/posts/:postId').put(tailleurController.updatePost).delete(tailleurController.deletePost);
-// Routes pour les statuts
 
+router.route('/achetercredit').post(tailleurController.acheterCredit);
 
 export {router};

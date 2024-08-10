@@ -40,8 +40,20 @@ db.createCollection("notes");
 db.createCollection("notifications");
 db.createCollection("reports");
 db.createCollection("users");
-db.createCollection("bloquers"); // Create the Bloquer collection
+db.createCollection("bloquer");
+db.createCollection("conversioncredit");
+db.createCollection("paiement");
+db.createCollection("tissu");
+db.createCollection("tissupost");
+db.createCollection("commande");
 
+
+// Insert data into "commande" collection
+db.commande.insertMany([
+    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId1"), client_id: ObjectId("compteId1"), createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId2"), client_id: ObjectId("compteId2"), createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId3"), client_id: ObjectId("compteId3"), createdAt: new Date(), updatedAt: new Date() }
+]);
 
 // Insert Users
 var userId1 = ObjectId();
@@ -110,6 +122,42 @@ var compteId3 = ObjectId();
 var compteId4 = ObjectId();
 var compteId5 = ObjectId();
 
+
+// Insert data into new collections
+
+// Insert data into "bloquer" collection
+db.bloquer.insertMany([
+    { _id: ObjectId(), userId: userId1, blockedUserId: userId2,  createdAt: new Date() },
+    { _id: ObjectId(), userId: userId3, blockedUserId: userId4,  createdAt: new Date() }
+]);
+
+// Insert data into "conversioncredit" collection
+db.conversioncredit.insertMany([
+    { _id: ObjectId(), prix: 100, credit: 1, createdAt: new Date() },
+    { _id: ObjectId(), prix: 200, credit: 2, createdAt: new Date() }
+]);
+
+// Insert data into "paiement" collection
+// Insert data into "paiement" collection
+db.paiement.insertMany([
+    { _id: ObjectId(), commande_id: ObjectId("commandeId1"), createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), commande_id: ObjectId("commandeId2"), createdAt: new Date(), updatedAt: new Date() }
+]);
+
+// Insert data into "tissu" collection
+db.tissu.insertMany([
+    { _id: ObjectId(), libelle: "Cotton", unite: "m", createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), libelle: "Silk", unite: "yard", createdAt: new Date(), updatedAt: new Date() }
+]);
+
+
+// Insert data into "tissupost" collection
+db.tissupost.insertMany([
+    { _id: ObjectId(), tissu_id: ObjectId("someTissuId1"), post_id: ObjectId("somePostId1"), prixMetre: 5.00, nombreMetre: 10, createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), tissu_id: ObjectId("someTissuId2"), post_id: ObjectId("somePostId2"), prixMetre: 15.00, nombreMetre: 20, createdAt: new Date(), updatedAt: new Date() }
+]);
+
+// Insert data into "comptes" collection with the new "credit" attribute
 db.comptes.insertMany([
     {
         _id: compteId1,
@@ -299,6 +347,7 @@ var postId1 = ObjectId();
 var postId3 = ObjectId();
 var postId5 = ObjectId();
 
+// Insert data into "posts" collection with the new "cout" attribute
 db.posts.insertMany([
     {
         _id: postId1,
@@ -346,6 +395,7 @@ db.posts.insertMany([
         tissus: [],
     },
 ]);
+
 
 // Insert Statuses
 var statusId1 = ObjectId();

@@ -13,7 +13,7 @@ import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import Comment from "../model/Comment.js";
 import CommentResponse from "../model/CommentResponse.js";
-import Measure from '../model/Measure.js';
+import Note from "../model/Note.js";
 
 import Measure from "../model/Measure.js";
 import TissuPost from '../model/TissuPost.js';
@@ -22,6 +22,7 @@ import Commande from '../model/Commande.js';
 import "dotenv/config";
 import comment from "../model/Comment.js";
 import Follow from "../model/Follow.js";
+
 
 class ClientController {
 
@@ -44,6 +45,7 @@ class ClientController {
         try {
             const Posts = await Post.find().populate('author_id').lean();
             const statuses = await Status.find().populate('tailleur_id').lean();
+
 
 /*             const notifications = await Notification.find().populate('post_id').lean();
  */    
@@ -70,6 +72,18 @@ class ClientController {
             return res.status(200).json({account, status: 'OK'});
         } catch (err) {
             return res.status(500).json({message: err.message, status: 'KO'});
+        }
+    }
+
+    async getNotificationById(req, res) {
+        try {
+            const notification = await Notification.findById(req.params.id).populate('post_id').lean();
+            if (!notification) {
+                return res.status(404).json({ message: 'Notification not found', status: 'KO' });
+            }
+            return res.status(200).json({ notification, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
         }
     }
 
@@ -333,9 +347,8 @@ class ClientController {
             res.status(500).json({message: 'Internal server error', status: 'KO'});
         }
     }
-      
-   // Récupérer tous les messages d'un client (utilisateur)
 
+    // Récupérer tous les messages d'un client (utilisateur)
     async getAllMessages(req, res) {
         try {
             const clientId = req.params.clientId || req.body.clientId || req.id;
@@ -539,7 +552,6 @@ class ClientController {
         }
         // return res.json(!compte);
         return res.json({ compte, message: 'Le profile de l\'utilisateur', status: 'OK' });
-
     }
 
     async accueilSearch(req, res) {
@@ -650,10 +662,10 @@ class ClientController {
     async deleteComment(req, res) {
         const { idComment } = req.body;
 
-        // return res.json(idComment);
         const idCompte = req.id;
 
         const commentDelete =  await Comment.findOneAndDelete(idComment);
+
 
         if(!commentDelete){
             return res.status(500).json({ message: 'Commentaire non trouvé', status: 'KO' });
@@ -749,18 +761,7 @@ class ClientController {
                 return res.status(404).json({ message: 'Post non trouvé après mise à jour', status: 'KO' });
             }
 
-            console.log('Share count updated:', updatedPost.shareNb);
-
-            // Retourner la nouvelle valeur de shareNb
-            return res.status(200).json({
-                message: 'Vous avez vue ce contenu.',
-                data: { viewsNb: updatedPost.viewsNb },
-                status: 'OK',
-            });
-        } catch (error) {
-            console.error('Error during sharing:', error);
-            return res.status(500).json({ message: 'Erreur lors de la visualisation.', error: error.message, status: 'KO' });
-        }
+        return res.json({ message: 'Commentaire supprimé', status: 'OK' });
     }
 
 
@@ -869,6 +870,27 @@ class ClientController {
         }
     }
 
+    //fonction pour ajouter la note d'un compte
+    async addNote(req, res) {
+        try {
+            // Récupération des données du corps de la requête
+            const { who_note_id, noted_id, rating } = req.body;
+
+            // Validation des données
+            if (!who_note_id || !noted_id || typeof rating !== 'number') {
+                return res.status(400).json({ error: 'Les champs who_note_id, noted_id et rating sont requis, et rating doit être un nombre.' });
+            }
+
+            // Appel de la méthode statique pour ajouter une note
+            const note = await Note.addNote(who_note_id, noted_id, rating);
+
+            // Réponse réussie
+            return res.status(201).json({ message: 'Note ajoutée avec succès.', note });
+        } catch (error) {
+            // Gestion des erreurs
+            return res.status(500).json({ error: error.message });
+        }
+    }
     
     // Exemple de fonction pour récupérer les notifications d'un utilisateur
     async getNotificationsForUser(req, res) {
@@ -1046,8 +1068,7 @@ class ClientController {
             res.status(500).json({ message: 'Erreur lors du blocage de l\'utilisateur', status: 'KO' });
         }
     }
-    
-
+   
 }
 
 export default new ClientController();

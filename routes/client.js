@@ -5,6 +5,7 @@ import { isAuthenticatedGlobal } from "../middleware/auth.js";
 import { isClientAuthenticated } from "../middleware/authClient.js";
 
 
+
 const router = express.Router();
 
 
@@ -15,6 +16,11 @@ router.route('/accueil')
     .get(clientController.getNewsFeed); // Route pour obtenir le fil d'actualité
 
 // Routes pour les posts
+
+router.route('/posts')
+    .get(tailleurController.listMyAllPosts)
+    .post(tailleurController.createPost);
+
  router.route('/posts/:id')
     .get(tailleurController.listMyAllPosts)
     .post(tailleurController.createPost);
@@ -38,20 +44,17 @@ router.route('/status')
     .get(tailleurController.listStatus)
     .post(tailleurController.createStatus);
 
+// Routes pour les statuts
+router.route('/status').get(clientController.listStatus);
 // Routes pour les messages
-
 // Routes pour les notifications
-router.route('/notifications/:id')
-    .get(clientController.getNotificationById); // Cette méthode devrait afficher la page de la notification
+router.route('/notifications/:id').get(clientController.getNotificationById); // Cette méthode devrait afficher la page de la notification
 // Routes pour les favoris des posts
-router.route('/messages/:id')
-    .get(clientController.getMessageById); // Cette méthode devrait afficher la page du message
-
+router.route('/messages/:id').get(clientController.getMessageById); // Cette méthode devrait afficher la page du message
 // Route pour accéder aux favoris par ID
-router.route('/favorites/:id')
-    .get(clientController.getFavoriteById); // Cette méthode devrait afficher la page du favori
-
+router.route('/favorites/:id').get(clientController.getFavoriteById); // Cette méthode devrait afficher la page du favori
 // Route pour créer un compte
+
 router.route('/compte')
     .post(clientController.createAccount);
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
@@ -59,9 +62,12 @@ router.route('/compte')
     .get(clientController.getAccount);
 
 router.route('/favorites').get(clientController.getAllFavorites);
+
 router.route('/favorites/add').post(clientController.addFavorite);
+
 router.route('/favorites/delete').delete(clientController.deleteFavorite);
-router.route('/compte/report').patch(clientController.signaler);
+
+router.route('/compte/report').post(clientController.signaler);
 
 // Route pour obtenir tous les messages d'un client (utilisateur)
 router.route('/messages').get(clientController.getAllMessages).post(clientController.sendMessage);
@@ -76,8 +82,14 @@ router.route('/dislike').post(clientController.addDislike);
 router.route('/unlike').delete(clientController.removeLikeOrDislike);
 
 router.route('/accueil/search').post(clientController.accueilSearch);
+
 router.route('/posts/comment').post(clientController.ajoutComment).delete(clientController.deleteComment);
+
 router.route('/posts/comment/reponse').post(clientController.reponseComment).delete(clientController.deleteResponseComment);
+
+
+//route pour attribuer note a un compte
+router.route('/note').post(clientController.addNote);
 
 // route pour enregistrer mesure
 router.route('/mesure').post(clientController.addMeasure);
@@ -88,7 +100,6 @@ router.post('/commandes',clientController.createCommande);
 router.route('/follow').post(clientController.follow);
 
 router.route('/bloquer').post(isAuthenticatedGlobal, clientController.bloquer);
-
 
 router.route('/profile/:identifiant').get(clientController.getSomeProfile);
 
