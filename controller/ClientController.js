@@ -617,26 +617,46 @@ async getFavoriteById(req, res) {
         return res.json({message: 'Réponse de commentaire supprimée', status: 'OK'});
     }
     // methode pour prendre de mesure
-    async takeMeasure(req, res) {
+
+
+
+    async addMeasure(req, res) {
         try {
-            const {idCompte} = req.params;
-            const {taille, poids, taille_monture, poids_monture} = req.body;
-            const compte = await Compte.findById(idCompte);
-
-            if (!compte) {
-                return res.status(404).json({message: 'Compte non trouvé', status: 'KO'});
+            const { Epaule, Manche, Longueur, Poitrine, Fesse, Taille, Cou } = req.body;
+    
+            // Vérifiez si tous les champs sont présents et sont des nombres
+            const fields = { Epaule, Manche, Longueur, Poitrine, Fesse, Taille, Cou };
+            for (const [key, value] of Object.entries(fields)) {
+                if (value === undefined) {
+                    return res.status(400).json({ message: `${key} is required` });
+                }
+                if (isNaN(value) || value < 0) {
+                    return res.status(400).json({ message: `${key} must be a positive number` });
+                }
             }
-
-            compte.taille = taille;
-            compte.poids = poids;
-            compte.taille_monture = taille_monture;
-            compte.poids_monture = poids_monture;
-            compte.updatedAt = new Date();
-            await compte.save();
-
-            return res.json({compte, message: 'Compte mis à jour', status: 'OK'});
-        } catch (err) {
-            return res.status(500).json({message: err.message, status: 'oooKO'});
+    
+            // Vérifiez si l'utilisateur est authentifié
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({ message: "User not authenticated" });
+            }
+            const compte_id = req.user.id;
+    
+            const newMeasure = new Measure({
+                ...fields,
+                compte_id
+            });
+    
+            const savedMeasure = await newMeasure.save();
+    
+            // Mise à jour du client avec la nouvelle mesure
+            await Client.findOneAndUpdate(
+                { compte_id: compte_id },
+                { $push: { measure_ids: savedMeasure._id } }
+            );
+    
+            res.status(201).json({ message: "Measure added successfully", measure: savedMeasure });
+        } catch (error) {
+            res.status(500).json({ message: "Error adding measure", error: error.message });
         }
     }
 

@@ -66,6 +66,6 @@ router.route('/accueil/search').post(clientController.accueilSearch);
 router.route('/posts/comment').post(clientController.ajoutComment).delete(clientController.deleteComment);
 router.route('/posts/comment/reponse').post(clientController.reponseComment).delete(clientController.deleteResponseComment);
 // route pour enregistrer mesure
-router.route('/mesure').post(clientController.takeMeasure);
+router.route('/mesure').post(clientController.addMeasure);
 
 export { router };
