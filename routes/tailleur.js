@@ -15,4 +15,5 @@ router.route('/posts').post(tailleurController.createPost).get(tailleurControlle
 router.route('/posts/:postId').put(tailleurController.updatePost).delete(tailleurController.deletePost);
 // Routes pour les statuts
 
+
 export {router};
