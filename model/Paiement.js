@@ -3,6 +3,7 @@ import {Schema} from "mongoose";
 
 const PaiementSchema = new Schema({
     commande_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Commande' },
+    
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });

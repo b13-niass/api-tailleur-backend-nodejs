@@ -13,6 +13,10 @@ router.route('/status').get(tailleurController.listMyAllPosts).post(tailleurCont
 
 router.route('/posts').post(tailleurController.createPost);
 router.route('/posts/:postId').put(tailleurController.updatePost).delete(tailleurController.deletePost);
+// Route pour calculer le crédit
+
+router.route('/achetercredit').post(tailleurController.acheterCredit);
+
 
 
 export {router};

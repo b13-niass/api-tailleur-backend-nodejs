@@ -3,6 +3,7 @@ import clientController from "../controller/ClientController.js";
 import tailleurController from "../controller/TailleurController.js";
 import { isAuthenticatedGlobal } from "../middleware/auth.js";
 
+
 const router = express.Router();
 
 router.use(isAuthenticatedGlobal); // Utilisez le middleware pour toutes les routes

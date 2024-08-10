@@ -16,6 +16,7 @@ import CommentResponse from "../model/CommentResponse.js";
 import Note from "../model/Note.js";
 import "dotenv/config";
 
+
 class ClientController {
 
     async createAccount(req, res) {
@@ -37,17 +38,17 @@ class ClientController {
         try {
             const Posts = await Post.find().populate('author_id').lean();
             const statuses = await Status.find().populate('tailleur_id').lean();
-            
+
             const notifications = await Notification.find().populate('post_id').lean();
-    
+
             const newsFeed = {
                 Posts,
                 statuses,
                 notificationLinks,  // Inclure uniquement les liens des notifications
-               /*  messageLinks,       // Inclure uniquement les liens des messages
-                favoriteLinks  */      // Inclure uniquement les liens des favoris
+                /*  messageLinks,       // Inclure uniquement les liens des messages
+                 favoriteLinks  */      // Inclure uniquement les liens des favoris
             };
-    
+
             return res.status(200).json({ newsFeed, status: 'OK' });
         } catch (err) {
             return res.status(500).json({ message: err.message, status: 'KO' });
@@ -75,42 +76,42 @@ class ClientController {
         }
     }
 
- async getNotificationById(req, res) {
-    try {
-        const notification = await Notification.findById(req.params.id).populate('post_id').lean();
-        if (!notification) {
-            return res.status(404).json({ message: 'Notification not found', status: 'KO' });
+    async getNotificationById(req, res) {
+        try {
+            const notification = await Notification.findById(req.params.id).populate('post_id').lean();
+            if (!notification) {
+                return res.status(404).json({ message: 'Notification not found', status: 'KO' });
+            }
+            return res.status(200).json({ notification, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
         }
-        return res.status(200).json({ notification, status: 'OK' });
-    } catch (err) {
-        return res.status(500).json({ message: err.message, status: 'KO' });
     }
-}
 
-// De même, ajouter les méthodes pour getMessageById et getFavoriteById
-async getMessageById(req, res) {
-    try {
-        const message = await Message.findById(req.params.id).populate('sender_id').lean();
-        if (!message) {
-            return res.status(404).json({ message: 'Message not found', status: 'KO' });
+    // De même, ajouter les méthodes pour getMessageById et getFavoriteById
+    async getMessageById(req, res) {
+        try {
+            const message = await Message.findById(req.params.id).populate('sender_id').lean();
+            if (!message) {
+                return res.status(404).json({ message: 'Message not found', status: 'KO' });
+            }
+            return res.status(200).json({ message, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
         }
-        return res.status(200).json({ message, status: 'OK' });
-    } catch (err) {
-        return res.status(500).json({ message: err.message, status: 'KO' });
     }
-}
 
-async getFavoriteById(req, res) {
-    try {
-        const favorite = await Favorite.findById(req.params.id).populate('post_id').lean();
-        if (!favorite) {
-            return res.status(404).json({ message: 'Favorite not found', status: 'KO' });
+    async getFavoriteById(req, res) {
+        try {
+            const favorite = await Favorite.findById(req.params.id).populate('post_id').lean();
+            if (!favorite) {
+                return res.status(404).json({ message: 'Favorite not found', status: 'KO' });
+            }
+            return res.status(200).json({ favorite, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
         }
-        return res.status(200).json({ favorite, status: 'OK' });
-    } catch (err) {
-        return res.status(500).json({ message: err.message, status: 'KO' });
     }
-}
 
 
     async listFavorites(req, res) {
@@ -230,8 +231,8 @@ async getFavoriteById(req, res) {
             return res.status(500).json({ message: 'Erreur lors du signalement du compte', status: 'KO', error: error.message });
         }
     }
-  
-   async showClientProfile(req, res) {
+
+    async showClientProfile(req, res) {
         try {
             const idUser = req.id;
             console.log("User ID: ", idUser);
@@ -270,16 +271,16 @@ async getFavoriteById(req, res) {
                 if (client && client.followClient_ids.length > 0) {
                     const followClients = await FollowClient.find({ client_id: client._id }).exec();
                     const followedClientIds = followClients.map(follow => follow.followed_client_id);
-            
+
                     const tailleurs = await Tailleur.find({ compte_id: { $in: followedClientIds } }).exec();
                     const tailleurIds = tailleurs.map(tailleur => tailleur._id);
-            
+
                     posts = await Post.find({ author_id: { $in: tailleurIds } }).exec();
                 }
             } else {
                 throw new Error('Unknown role');
             }
-            
+
             // Répondre avec les données trouvées
             res.status(200).json({
                 compte,
@@ -292,8 +293,8 @@ async getFavoriteById(req, res) {
             res.status(500).json({ message: 'Internal server error', status: 'KO' });
         }
     }
-  
-   // Récupérer tous les messages d'un client (utilisateur)
+
+    // Récupérer tous les messages d'un client (utilisateur)
     async getAllMessages(req, res) {
         try {
             const clientId = req.params.clientId || req.body.clientId || req.id;
@@ -327,7 +328,7 @@ async getFavoriteById(req, res) {
             const receiverId = req.params.receiverId || req.body.receiverId || req.id;
             const texte = req.params.texte || req.body.texte || req.id;
 
-           
+
             // Utilisez ces valeurs pour tester la fonction
 
 
@@ -469,8 +470,8 @@ async getFavoriteById(req, res) {
             return res.status(500).json({ message: err.message, status: 'KO' });
         }
     }
-  
-   async userProfile(req, res) {
+
+    async userProfile(req, res) {
         // const user = await this.getLoginUser(req,res);
         const id = req.id;
         // return res.json(id);
@@ -478,14 +479,14 @@ async getFavoriteById(req, res) {
         const compte = await Compte.findById(id);
         // return res.json(!compte);
         if (!compte) {
-            return res.status(404).json({message: 'User non trouvé', status: 'KO'});
+            return res.status(404).json({ message: 'User non trouvé', status: 'KO' });
         }
         // return res.json(!compte);
-        return res.json({compte, message: 'Le profile de l\'utilisateur' , status: 'OK'});
+        return res.json({ compte, message: 'Le profile de l\'utilisateur', status: 'OK' });
     }
 
     async accueilSearch(req, res) {
-        const {searchText} = req.body
+        const { searchText } = req.body
         /**
          * Faire la validation
          */
@@ -511,8 +512,8 @@ async getFavoriteById(req, res) {
             ]
         });
 
-        if(!comptes){
-            return res.status(500).json({message: 'pas de compte retrouver', status: 'KO'});
+        if (!comptes) {
+            return res.status(500).json({ message: 'pas de compte retrouver', status: 'KO' });
         }
 
         const posts = await Post.find({
@@ -521,14 +522,14 @@ async getFavoriteById(req, res) {
                 { title: { $regex: regex } }
             ]
         })
-        if(!posts){
-            return res.status(500).json({message: 'pas de post retrouver', status: 'KO'});
+        if (!posts) {
+            return res.status(500).json({ message: 'pas de post retrouver', status: 'KO' });
         }
-        return res.json({comptes, posts, message: 'Résultats de la recherche', status: 'OK'});
+        return res.json({ comptes, posts, message: 'Résultats de la recherche', status: 'OK' });
     }
 
     async ajoutComment(req, res) {
-        const {content, idPost} = req.body;
+        const { content, idPost } = req.body;
         const idCompte = req.id;
 
         /**
@@ -550,15 +551,15 @@ async getFavoriteById(req, res) {
         }, { new: true });
 
         if (!post) {
-            return res.status(404).json({message: 'Post non trouvé', status: 'KO'});
+            return res.status(404).json({ message: 'Post non trouvé', status: 'KO' });
         }
 
-        return res.json({comment: newComment, message: 'Commentaire ajouté', status: 'OK'});
+        return res.json({ comment: newComment, message: 'Commentaire ajouté', status: 'OK' });
 
     }
 
     async reponseComment(req, res) {
-        const {content, idComment, idCompte} = req.body;
+        const { content, idComment, idCompte } = req.body;
 
         /**
          * valider le content ici
@@ -579,41 +580,41 @@ async getFavoriteById(req, res) {
         }, { new: true });
 
         if (!comment) {
-            return res.status(404).json({message: 'Commentaire non trouvé', status: 'KO'});
+            return res.status(404).json({ message: 'Commentaire non trouvé', status: 'KO' });
         }
 
-        return res.json({commentResponse: newCommentResponse, message: 'Réponse ajoutée', status: 'OK'});
+        return res.json({ commentResponse: newCommentResponse, message: 'Réponse ajoutée', status: 'OK' });
     }
 
     async deleteComment(req, res) {
-        const {idComment} = req.body;
+        const { idComment } = req.body;
         const idCompte = req.id;
 
         const compte = await Compte.findById(idCompte);
 
-        if (compte.role === "tailleur"){
+        if (compte.role === "tailleur") {
 
         }
 
         const comment = await Comment.findByIdAndDelete(idComment);
 
         if (!comment) {
-            return res.status(404).json({message: 'Commentaire non trouvé', status: 'KO'});
+            return res.status(404).json({ message: 'Commentaire non trouvé', status: 'KO' });
         }
 
-        return res.json({message: 'Commentaire supprimé', status: 'OK'});
+        return res.json({ message: 'Commentaire supprimé', status: 'OK' });
     }
 
     async deleteResponseComment(req, res) {
-        const {idCommentResponse} = req.body;
+        const { idCommentResponse } = req.body;
 
         const commentResponse = await CommentResponse.findByIdAndDelete(idCommentResponse);
 
         if (!commentResponse) {
-            return res.status(404).json({message: 'Réponse de commentaire non trouvée', status: 'KO'});
+            return res.status(404).json({ message: 'Réponse de commentaire non trouvée', status: 'KO' });
         }
 
-        return res.json({message: 'Réponse de commentaire supprimée', status: 'OK'});
+        return res.json({ message: 'Réponse de commentaire supprimée', status: 'OK' });
     }
 
     //fonction pour ajouter la note d'un compte
@@ -638,6 +639,7 @@ async getFavoriteById(req, res) {
         }
     }
 
+    
 }
 
 export default new ClientController();

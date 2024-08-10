@@ -39,6 +39,20 @@ db.createCollection("notes");
 db.createCollection("notifications");
 db.createCollection("reports");
 db.createCollection("users");
+db.createCollection("bloquer");
+db.createCollection("conversioncredit");
+db.createCollection("paiement");
+db.createCollection("tissu");
+db.createCollection("tissupost");
+db.createCollection("commande");
+
+
+// Insert data into "commande" collection
+db.commande.insertMany([
+    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId1"), client_id: ObjectId("compteId1"), createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId2"), client_id: ObjectId("compteId2"), createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId3"), client_id: ObjectId("compteId3"), createdAt: new Date(), updatedAt: new Date() }
+]);
 
 // Insert Users
 var userId1 = ObjectId();
@@ -62,12 +76,48 @@ var compteId3 = ObjectId();
 var compteId4 = ObjectId();
 var compteId5 = ObjectId();
 
+
+// Insert data into new collections
+
+// Insert data into "bloquer" collection
+db.bloquer.insertMany([
+    { _id: ObjectId(), userId: userId1, blockedUserId: userId2,  createdAt: new Date() },
+    { _id: ObjectId(), userId: userId3, blockedUserId: userId4,  createdAt: new Date() }
+]);
+
+// Insert data into "conversioncredit" collection
+db.conversioncredit.insertMany([
+    { _id: ObjectId(), prix: 100, credit: 1, createdAt: new Date() },
+    { _id: ObjectId(), prix: 200, credit: 2, createdAt: new Date() }
+]);
+
+// Insert data into "paiement" collection
+// Insert data into "paiement" collection
+db.paiement.insertMany([
+    { _id: ObjectId(), commande_id: ObjectId("commandeId1"), createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), commande_id: ObjectId("commandeId2"), createdAt: new Date(), updatedAt: new Date() }
+]);
+
+// Insert data into "tissu" collection
+db.tissu.insertMany([
+    { _id: ObjectId(), libelle: "Cotton", unite: "m", createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), libelle: "Silk", unite: "yard", createdAt: new Date(), updatedAt: new Date() }
+]);
+
+
+// Insert data into "tissupost" collection
+db.tissupost.insertMany([
+    { _id: ObjectId(), tissu_id: ObjectId("someTissuId1"), post_id: ObjectId("somePostId1"), prixMetre: 5.00, nombreMetre: 10, createdAt: new Date(), updatedAt: new Date() },
+    { _id: ObjectId(), tissu_id: ObjectId("someTissuId2"), post_id: ObjectId("somePostId2"), prixMetre: 15.00, nombreMetre: 20, createdAt: new Date(), updatedAt: new Date() }
+]);
+
+// Insert data into "comptes" collection with the new "credit" attribute
 db.comptes.insertMany([
-    { _id: compteId1, email: "john.smith@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "johnsmith", bio: "I am John Smith", user_id: userId1, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
-    { _id: compteId2, email: "jane.doe@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "client", createdAt: new Date(), updatedAt: new Date(), identifiant: "janedoe", bio: "I am Jane Doe", user_id: userId2, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
-    { _id: compteId3, email: "charlie.brown@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "charliebrown", bio: "I am Charlie Brown", user_id: userId3, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
-    { _id: compteId4, email: "emily.johnson@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "client", createdAt: new Date(), updatedAt: new Date(), identifiant: "emilyjohnson", bio: "I am Emily Johnson", user_id: userId4, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] },
-    { _id: compteId5, email: "james.williams@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "jameswilliams", bio: "I am James Williams", user_id: userId5, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [] }
+    { _id: compteId1, email: "john.smith@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "johnsmith", bio: "I am John Smith", user_id: userId1, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [], credit: 20 },
+    { _id: compteId2, email: "jane.doe@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "client", createdAt: new Date(), updatedAt: new Date(), identifiant: "janedoe", bio: "I am Jane Doe", user_id: userId2, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [], credit: 10 },
+    { _id: compteId3, email: "charlie.brown@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "charliebrown", bio: "I am Charlie Brown", user_id: userId3, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [], credit: 13 },
+    { _id: compteId4, email: "emily.johnson@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "client", createdAt: new Date(), updatedAt: new Date(), identifiant: "emilyjohnson", bio: "I am Emily Johnson", user_id: userId4, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [], credit: 2},
+    { _id: compteId5, email: "james.williams@example.com", password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC", etat: "active", role: "tailleur", createdAt: new Date(), updatedAt: new Date(), identifiant: "jameswilliams", bio: "I am James Williams", user_id: userId5, comment_ids: [], favorite_ids: [], follower_ids: [], report_ids: [], note_ids: [], credit: 4 }
 ]);
 
 // password pour user : password123
@@ -110,11 +160,13 @@ var postId1 = ObjectId();
 var postId3 = ObjectId();
 var postId5 = ObjectId();
 
+// Insert data into "posts" collection with the new "cout" attribute
 db.posts.insertMany([
-    { _id: postId1, content: "Post from John", title: "John's Tailoring", image: ["image1.jpg"], createdAt: new Date(), updatedAt: new Date(), shareNb: 10, viewsNb: 100, author_id: tailleurId1, comment_ids: [], like_ids: [] },
-    { _id: postId3, content: "Post from Charlie", title: "Charlie's Tailoring", image: ["image3.jpg"], createdAt: new Date(), updatedAt: new Date(), shareNb: 15, viewsNb: 150, author_id: tailleurId3, comment_ids: [], like_ids: [] },
-    { _id: postId5, content: "Post from James", title: "James's Tailoring", image: ["image5.jpg"], createdAt: new Date(), updatedAt: new Date(), shareNb: 20, viewsNb: 200, author_id: tailleurId5, comment_ids: [], like_ids: [] }
+    { _id: postId1, content: "Post from John", title: "John's Tailoring", image: ["image1.jpg"], createdAt: new Date(), updatedAt: new Date(), shareNb: 10, viewsNb: 100, author_id: tailleurId1, comment_ids: [], like_ids: [], cout: 2 },
+    { _id: postId3, content: "Post from Charlie", title: "Charlie's Tailoring", image: ["image3.jpg"], createdAt: new Date(), updatedAt: new Date(), shareNb: 15, viewsNb: 150, author_id: tailleurId3, comment_ids: [], like_ids: [], cout: 2 },
+    { _id: postId5, content: "Post from James", title: "James's Tailoring", image: ["image5.jpg"], createdAt: new Date(), updatedAt: new Date(), shareNb: 20, viewsNb: 200, author_id: tailleurId5, comment_ids: [], like_ids: [], cout: 2 }
 ]);
+
 
 // Insert Statuses
 var statusId1 = ObjectId();
