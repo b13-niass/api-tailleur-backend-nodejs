@@ -7,7 +7,7 @@ import follow from "../model/Follow.js";
 
 class TailleurController {
  
-    async listMyAllPosts(req, res) {
+/*     async listMyAllPosts(req, res) {
         try {
             const { tailleurId } = req.params; // Suppose que l'ID du tailleur est passé en paramètre
 
@@ -27,41 +27,101 @@ class TailleurController {
         } catch (err) {
             return res.status(500).json({ message: err.message, status: 'KO' });
         }
-    }
+    } */
     
-    // Créer un nouveau statut
-    async createStatus(req, res) {
+    async listMyAllPosts(req, res) {
         try {
-            const tailleurId = req.id;
-
-            const { files, description, duration, viewsNB, categories } = req.body;
-
-            // Vérifiez si l'ID est valide
+            const { tailleurId } = req.params; // ID de l'utilisateur connecté (qu'il soit tailleur ou client)
+            // Assurez-vous que l'ID est valide
             if (!mongoose.Types.ObjectId.isValid(tailleurId)) {
-                
-                return res.status(400).json({ message: 'ID de tailleur invalide', status: 'KO' });
+                return res.status(400).json({ message: 'ID invalide', status: 'KO' });
             }
-            // return res.json(files);
-            const newStatus = new Status({
-                files: files || 'example.mp4',
-                description: description || 'Model du jour',
-                duration: duration ,
-                viewsNB: viewsNB || 1000,
-                categories: categories || 'video',
-                tailleur_id: tailleurId
-            });
-
-            // Sauvegarder le nouveau statut dans la base de données
-            const savedStatus = await newStatus.save();
-            res.status(201).json({ message: 'Statut créé', status: savedStatus });
-        } catch (error) {
-            console.error('Erreur lors de la création du statut:', error);
-            res.status(500).json({ message: error.message, status: 'KO' });
+    
+            // Récupérer le compte de l'utilisateur connecté
+            const account = await Compte.findById(tailleurId).populate('user_id').lean();
+            if (!account) {
+                return res.status(404).json({ message: 'Compte introuvable', status: 'KO' });
+            }
+    
+            const userType = account.user_id.type; // Type d'utilisateur ('client' ou 'tailleur')
+    
+            let statuses = [];
+    
+            if (userType === 'client') {
+                // Récupérer les posts des tailleurs auxquels ce client est abonné (si leur compte est activé)
+                const tailleursSuivis = account.follower_ids.map(follower => follower._id);
+                statuses = await Status.find({
+                    tailleur_id: { $in: tailleursSuivis },
+                    'tailleur_id.compte_id': { isActive: true }  // Vérifier que le compte du tailleur est activé
+                }).populate('tailleur_id').lean();
+            } else if (userType === 'tailleur') {
+                // Récupérer ses propres posts et ceux des tailleurs auxquels il est abonné (si leur compte est activé)
+                const tailleursSuivis = account.follower_ids.map(follower => follower._id);
+                statuses = await Status.find({
+                    $or: [
+                        { tailleur_id: { $in: tailleursSuivis }, 'tailleur_id.compte_id': { isActive: true } }, // Posts des tailleurs suivis
+                        { tailleur_id: tailleurId } // Ses propres posts
+                    ]
+                }).populate('tailleur_id').lean();
+            }
+    
+            if (statuses.length === 0) {
+                return res.status(404).json({ message: 'Aucun post trouvé', status: 'KO' });
+            }
+    
+            res.status(200).json({ statuses, status: 'OK' });
+        } catch (err) {
+            return res.status(500).json({ message: err.message, status: 'KO' });
         }
     }
+
+    //le tailleur pourra bloquer  un autre tailleur abonné
+
+/* ainsi qu’un client abonnée aussi
+     */
+
+    // Créer un nouveau statut
+  async createStatus(req, res) {
+    try {
+        const tailleurId = req.id;
+
+        const { files, description, viewsNB, categories } = req.body;
+
+        // Vérifiez si l'ID est valide
+        if (!mongoose.Types.ObjectId.isValid(tailleurId)) {
+            return res.status(400).json({ message: 'ID de tailleur invalide', status: 'KO' });
+        }
+
+        // Définir la durée automatiquement, par exemple, 1 minute (60 secondes)
+        const autoDuration = 1 ; // le statu sera supprimer apres 24h durée en minutes
+
+        const newStatus = new Status({
+            files: files || 'example.mp4',
+            description: description || 'Model du jour',
+            duration: autoDuration, // durée automatiquement définie
+            viewsNB: viewsNB || 1000,
+            categories: categories || 'video',
+            tailleur_id: tailleurId
+        });
+
+        // Sauvegarder le nouveau statut dans la base de données
+        const savedStatus = await newStatus.save();
+
+        // Planifier la suppression du statut après la durée définie (1 minute)
+        setTimeout(async () => {
+            await Status.deleteOne({ _id: savedStatus._id });
+            console.log(`Statut avec l'ID ${savedStatus._id} supprimé après ${autoDuration} minute(s).`);
+        }, autoDuration * 60 * 1000); // Conversion en millisecondes
+
+        res.status(201).json({ message: 'Statut créé', status: savedStatus });
+    } catch (error) {
+        console.error('Erreur lors de la création du statut:', error);
+        res.status(500).json({ message: error.message, status: 'KO' });
+    }
+}
+
     async listStatus(req, res) {
-/*         return res.json(1);
- */        try {
+        try {
             const userId = req.id;  // ID de l'utilisateur connecté passé en paramètre
             const now = new Date();
            
@@ -79,10 +139,7 @@ class TailleurController {
             
             // Type d'utilisateur ('client' ou 'tailleur')
             let statuses = [];
-/*             console.log(userType);
- */            
-/*             console.log('ID extrait de la requête:', req.id || req.body.tailleurId);
- */
+
             if (userType === 'client') {
                 // Si c'est un client, récupérer les statuts des tailleurs qu'il suit
                 const tailleursSuivis = account.follower_ids.map(follower => follower._id); // Liste des ID des tailleurs suivis
@@ -111,25 +168,7 @@ class TailleurController {
 
         console.log('Statuts actifs:', activeStatuses);
 
-        // Supprimer les statuts expirés
-        const statusesToDelete = statuses.filter(status => {
-            const createdAt = new Date(status.createdAt);
-            const durationInSeconds = status.duration * 60; // Durée du statut en secondes
-            const differenceInSeconds = (now - createdAt) / 1000; // Conversion des millisecondes en secondes
-
-            // Supprimer les statuts dont la durée est dépassée
-            return (differenceInSeconds > durationInSeconds);
-        });
-            
-            // Log les statuts à supprimer avant la suppression
-            console.log('Statuts à supprimer:',statuses, statusesToDelete.map(status => status._id));
-    
-            if (statusesToDelete.length > 0) {
-                const deleteResult = await Status.deleteMany({ _id: { $in: statusesToDelete.map(status => status._id) } });
-                // Log le résultat de la suppression
-                console.log('Résultat de la suppression:', deleteResult);
-            }
-    
+       
             return res.status(200).json({ statuses: activeStatuses, status: 'OK' });
         } catch (err) {
             return res.status(500).json({ message: err.message, status: 'KO' });
