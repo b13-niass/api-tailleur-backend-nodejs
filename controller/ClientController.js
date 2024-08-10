@@ -13,6 +13,9 @@ import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import Comment from "../model/Comment.js";
 import CommentResponse from "../model/CommentResponse.js";
+import TissuPost from '../model/TissuPost.js';
+import Commande from '../model/Commande.js';
+
 import "dotenv/config";
 
 class ClientController {
@@ -704,31 +707,42 @@ class ClientController {
             return res.status(500).json({ message: 'Erreur lors de la visualisation.', error: error.message, status: 'KO' });
         }
     }
+
+
+    async createCommande(req, res) {
+        try {
+            const { tissuPostId, clientId } = req.body;
+
+            // Vérifions si l'identifiant du tissuPost est valide
+            if (!mongoose.Types.ObjectId.isValid(tissuPostId)) {
+                // console.log('tissuPostId:', tissuPostId);
+                return res.status(400).json({ message: 'ID de TissuPost invalide', status: 'KO' });
+            }
+
+            // Vérifioons si l'identifiant du client est valide
+            const tissuPosts = await TissuPost.findById(tissuPostId).exec();
+            console.log(tissuPostId);
+            if (!tissuPosts) {
+                return res.status(404).json({ message: 'TissuPost non trouvé', status: 'KO' });
+            }
+
+            const newCommande = new Commande({
+                tissupost_id: tissuPostId,
+                client_id: clientId,
+                createdAt: new Date(),
+                updatedAt: new Date()
+            });
+
+            // Enregistrez la nouvelle commande dans la base de données
+            await newCommande.save();
+
+            return res.status(201).json({ message: 'Commande créée avec succès', commande: newCommande, status: 'OK' });
+
+        } catch (error) {
+            return res.status(500).json({ message: error.message, status: 'KO' });
+        }
+    }
+
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export default new ClientController();

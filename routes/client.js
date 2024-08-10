@@ -68,6 +68,8 @@ router.route('/posts/comment').post(clientController.ajoutComment).delete(client
 router.route('/posts/comment/reponse').post(clientController.reponseComment).delete(clientController.deleteResponseComment);
 router.route('/share').post(clientController.ShareNb);
 router.route('/view').post(clientController.ViewsNb);
+router.post('/commandes',clientController.createCommande);
+
 
 
 
