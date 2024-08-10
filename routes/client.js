@@ -76,6 +76,9 @@ router.post('/commandes',clientController.createCommande);
 
 
 
+router.route('/follow').post(clientController.follow);
+
+router.route('/profile/:identifiant').get(clientController.getSomeProfile);
 
 export { router };
 
