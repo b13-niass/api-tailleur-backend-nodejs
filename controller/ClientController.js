@@ -13,6 +13,8 @@ import Client from '../model/Client.js';
 import Like from '../model/Like.js';
 import Comment from "../model/Comment.js";
 import CommentResponse from "../model/CommentResponse.js";
+
+import Measure from "../model/Measure.js";
 import TissuPost from '../model/TissuPost.js';
 import Commande from '../model/Commande.js';
 
@@ -807,6 +809,47 @@ class ClientController {
         return res.json({message:'Vous avez suivi l\'utilisateur', status: 'OK'});
     }
 
+    async addMeasure(req, res) {
+        try {
+            const { Epaule, Manche, Longueur, Poitrine, Fesse, Taille, Cou } = req.body;
+    
+            // Vérifiez si tous les champs sont présents et sont des nombres
+            const fields = { Epaule, Manche, Longueur, Poitrine, Fesse, Taille, Cou };
+            for (const [key, value] of Object.entries(fields)) {
+                if (value === undefined) {
+                    return res.status(400).json({ message: `${key} is required` });
+                }
+                if (isNaN(value) || value < 0) {
+                    return res.status(400).json({ message: `${key} must be a positive number` });
+                }
+            }
+    
+            // Vérifiez si l'utilisateur est authentifié
+            if (!req.user || !req.user.id) {
+                return res.status(401).json({ message: "User not authenticated" });
+            }
+            const compte_id = req.user.id;
+    
+            const newMeasure = new Measure({
+                ...fields,
+                compte_id
+            });
+    
+            const savedMeasure = await newMeasure.save();
+    
+            // Mise à jour du client avec la nouvelle mesure
+            await Client.findOneAndUpdate(
+                { compte_id: compte_id },
+                { $push: { measure_ids: savedMeasure._id } }
+            );
+    
+            res.status(201).json({ message: "Measure added successfully", measure: savedMeasure });
+        } catch (error) {
+            res.status(500).json({ message: "Error adding measure", error: error.message });
+        }
+    }
+
+
     async getSomeProfile(req, res){
         const {identifiant} = req.params.identifiant;
         const idCompte = req.id;
@@ -868,6 +911,7 @@ class ClientController {
             return res.json({user, compte, posts,isMyFollower, message: "Profile de l'utilisateur" , status: 'OK'});
         }
     }
+
 
 }
 

@@ -1,8 +1,7 @@
-
 // MongoDB Playground
 // Use Ctrl+Space inside a snippet or a string literal to trigger completions.
 
-use('monprojet-tailleur');
+use("projet-tailleur");
 
 // Drop existing collections (optional)
 db.clients.drop();
@@ -679,7 +678,7 @@ db.comptes.updateOne(
     }
 );
 
-// update collection **************************
+// update collection ******************************************************************************
 
 // Création de la collection Tissu
 db.createCollection("tissus");
@@ -789,3 +788,4 @@ db.posts.updateOne(
         },
     }
 );
+

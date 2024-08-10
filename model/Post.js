@@ -13,6 +13,13 @@ const PostSchema = new Schema({
     viewsNb: Number,
     cout: {type: Number, default: 2},
     author_id: { type: Schema.Types.ObjectId, ref: 'Tailleur' },
+    // tissus: [{ type: Schema.Types.ObjectId, ref: 'TissuPost'}],
+    tissus: [{
+        tissu_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Tissu' },
+        prixMetre: Number,
+        nombreMetre: Number,
+        tissuPost_id: { type: mongoose.Schema.Types.ObjectId, ref: 'TissuPost' }
+      }],
     comment_ids: [{ type: Schema.Types.ObjectId, ref: 'Comment' }],
     like_ids: [{ type: Schema.Types.ObjectId, ref: 'Like' }]
 });
