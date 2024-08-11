@@ -117,7 +117,8 @@ class AuthController {
                 user_id: user._id,
                 updatedAt: new Date(),
                 createdAt: new Date(),
-                etat: 'active'
+                etat: 'active',
+                credit: 0
             })
             await compte.save();
 

@@ -146,10 +146,13 @@ class TailleurController {
     async createPost(req, res) {
         try {
             const idCompte = req.id;
-            // const tailleur = await Tailleur.findOne({compte_id: idCompte});
+            const compte = await Compte.findById(idCompte);
+            const now = new Date();
+            const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
 
             // Valider les champs
-            const {content, title, image, tissus} = req.body;
+            const {content, title, image, tissus,useCredit} = req.body;
 
             if (!content || typeof content !== 'string') {
                 return res.status(400).json({message: "Content must be a non-empty string", status: 'KO'});
@@ -181,46 +184,103 @@ class TailleurController {
             if (!tailleur) {
                 return res.status(404).json({message: "Tailleur not found", status: 'KO'});
             }
-            // Créer le post
-            const newPost = new Post({
-                content,
-                title,
-                image,
-                createdAt: new Date(),
-                updatedAt: new Date(),
-                shareNb: 0,
-                viewsNb: 0,
-                cout: 2,
+            const allMyPosts = await Post.find({
                 author_id: tailleur._id,
-                tissus: []
+                cout: 0,
+                createdAt: { $gte: startOfMonth, $lte: endOfMonth }
             });
+            // return res.json(allMyPosts);
+            if(allMyPosts.length >= 1 || useCredit == true){
+                if (parseInt(compte.credit) >= 2){
+                    compte.credit -= 2;
+                    await compte.save();
+                    const newPost = new Post({
+                        content,
+                        title,
+                        image,
+                        createdAt: new Date(),
+                        updatedAt: new Date(),
+                        shareNb: 0,
+                        viewsNb: 0,
+                        cout: 2,
+                        author_id: tailleur._id,
+                        tissus: []
+                    });
 
-            await newPost.save();
+                    await newPost.save();
 
-            // Créer les TissuPost et les lier au Post
-            for (let tissu of tissus) {
-                const newTissuPost = new TissuPost({
-                    prixMetre: tissu.prixMetre,
-                    nombreMetre: tissu.nombreMetre,
-                    post_id: newPost._id,
-                    tissu_id: tissu.tissu_id,
-                    createdAt: new Date(),
-                    updatedAt: new Date()
-                });
-                await newTissuPost.save();
-                await Post.findByIdAndUpdate(newPost._id, {
-                    $push: {
-                        tissus: {
-                            tissu_id: tissu.tissu_id,
+                    // Créer les TissuPost et les lier au Post
+                    for (let tissu of tissus) {
+                        const newTissuPost = new TissuPost({
                             prixMetre: tissu.prixMetre,
                             nombreMetre: tissu.nombreMetre,
-                            tissuPost_id: newTissuPost._id
-                        }
+                            post_id: newPost._id,
+                            tissu_id: tissu.tissu_id,
+                            createdAt: new Date(),
+                            updatedAt: new Date()
+                        });
+                        await newTissuPost.save();
+                        await Post.findByIdAndUpdate(newPost._id, {
+                            $push: {
+                                tissus: {
+                                    tissu_id: tissu.tissu_id,
+                                    prixMetre: tissu.prixMetre,
+                                    nombreMetre: tissu.nombreMetre,
+                                    tissuPost_id: newTissuPost._id
+                                }
+                            }
+                        });
                     }
+                    return res.status(201).json({message: "Post created successfully", status: 'OK', post: newPost});
+                }else{
+                    return res.json({message: "Votre crédit est insufisant et Vous avez déjà plus d'un post ce mois-ci, Achetez du crédit", status: 'KO'});
+                }
+            }else{
+
+                if (image.length > 1){
+                    return res.json({message: "Vous ne pouvez poster plus de 1 image pour le moment, utiliser vos crédit pour", status: 'KO'});
+                }
+
+                const newPost = new Post({
+                    content,
+                    title,
+                    image,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                    shareNb: 0,
+                    viewsNb: 0,
+                    cout: 0,
+                    author_id: tailleur._id,
+                    tissus: []
                 });
 
-               return res.status(201).json({message: "Post created successfully", status: 'OK', post: newPost});
+                await newPost.save();
+
+                // Créer les TissuPost et les lier au Post
+                for (let tissu of tissus) {
+                    const newTissuPost = new TissuPost({
+                        prixMetre: tissu.prixMetre,
+                        nombreMetre: tissu.nombreMetre,
+                        post_id: newPost._id,
+                        tissu_id: tissu.tissu_id,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    });
+                    await newTissuPost.save();
+                    await Post.findByIdAndUpdate(newPost._id, {
+                        $push: {
+                            tissus: {
+                                tissu_id: tissu.tissu_id,
+                                prixMetre: tissu.prixMetre,
+                                nombreMetre: tissu.nombreMetre,
+                                tissuPost_id: newTissuPost._id
+                            }
+                        }
+                    });
+                }
+                return res.status(201).json({message: "Post created successfully", status: 'OK', post: newPost});
             }
+
         } catch (err) {
             console.error(err);
             return res.status(500).json({message: err.message, status: 'KO'});
