@@ -4,8 +4,6 @@ import tailleurController from "../controller/TailleurController.js";
 import { isAuthenticatedGlobal } from "../middleware/auth.js";
 import { isClientAuthenticated } from "../middleware/authClient.js";
 
-
-
 const router = express.Router();
 
 
@@ -38,14 +36,6 @@ router.route('/accueil/posts/:id', ).get(clientController.getPostById);
 
 router.route('/profile').get(clientController.userProfile);
 
-
-// Routes pour les statuts
-router.route('/status')
-    .get(tailleurController.listStatus)
-    .post(tailleurController.createStatus);
-
-// Routes pour les statuts
-router.route('/status').get(clientController.listStatus);
 // Routes pour les messages
 // Routes pour les notifications
 router.route('/notifications/:id').get(clientController.getNotificationById); // Cette méthode devrait afficher la page de la notification
@@ -95,7 +85,7 @@ router.route('/note').post(clientController.addNote);
 router.route('/mesure').post(clientController.addMeasure);
 router.route('/share').post(clientController.ShareNb);
 router.route('/view').post(clientController.ViewsNb);
-router.post('/commandes',clientController.createCommande);
+router.route('/commandes').post(clientController.createCommande);
 
 router.route('/follow').post(clientController.follow);
 

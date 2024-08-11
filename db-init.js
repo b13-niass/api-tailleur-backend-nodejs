@@ -1,850 +1,301 @@
 // MongoDB Playground
-// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+use("monprojet-tailleur");
 
-use("projet-tailleur");
-
-// Drop existing collections (optional)
-db.clients.drop();
-db.comments.drop();
-db.commentresponses.drop();
-db.comptes.drop();
-db.favorites.drop();
-db.follows.drop();
-db.likes.drop();
-db.measures.drop();
-db.messages.drop();
-db.notes.drop();
-db.notifications.drop();
-db.posts.drop();
-db.reports.drop();
-db.status.drop();
-db.tailleurs.drop();
-db.users.drop();
-db.bloquers.drop(); // Drop the Bloquer collection if it exists
-
+// Drop existing collections
+const collections = [
+    "clients", "comments", "commentresponses", "comptes", "favorites", "follows", "likes", "measures",
+    "messages", "notes", "notifications", "posts", "reports", "status", "tailleurs", "users",
+    "conversioncredits", "paiements", "tissus", "tissuposts", "commandes", "bloquers"
+];
+collections.forEach(collection => db[collection].drop());
 
 // Create Collections
-db.createCollection("clients");
-db.createCollection("favorites");
-db.createCollection("tailleurs");
-db.createCollection("measures");
-db.createCollection("comptes");
-db.createCollection("posts");
-db.createCollection("status");
-db.createCollection("follows");
-db.createCollection("comments");
-db.createCollection("commentresponses");
-db.createCollection("likes");
-db.createCollection("messages");
-db.createCollection("notes");
-db.createCollection("notifications");
-db.createCollection("reports");
-db.createCollection("users");
-db.createCollection("bloquer");
-db.createCollection("conversioncredit");
-db.createCollection("paiement");
-db.createCollection("tissu");
-db.createCollection("tissupost");
-db.createCollection("commande");
-
-
-// Insert data into "commande" collection
-db.commande.insertMany([
-    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId1"), client_id: ObjectId("compteId1"), createdAt: new Date(), updatedAt: new Date() },
-    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId2"), client_id: ObjectId("compteId2"), createdAt: new Date(), updatedAt: new Date() },
-    { _id: ObjectId(), tissupost_id: ObjectId("tissuPostId3"), client_id: ObjectId("compteId3"), createdAt: new Date(), updatedAt: new Date() }
-]);
+collections.forEach(collection => db.createCollection(collection));
 
 // Insert Users
-var userId1 = ObjectId();
-var userId2 = ObjectId();
-var userId3 = ObjectId();
-var userId4 = ObjectId();
-var userId5 = ObjectId();
-
-db.users.insertMany([
-    {
-        _id: userId1,
-        lastname: "Smith",
-        firstname: "John",
-        phone: "1234567890",
-        city: "New York",
-        picture: "john_smith.jpg",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: userId2,
-        lastname: "Doe",
-        firstname: "Jane",
-        phone: "0987654321",
-        city: "Los Angeles",
-        picture: "jane_doe.jpg",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: userId3,
-        lastname: "Brown",
-        firstname: "Charlie",
-        phone: "1112223333",
-        city: "Chicago",
-        picture: "charlie_brown.jpg",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: userId4,
-        lastname: "Johnson",
-        firstname: "Emily",
-        phone: "4445556666",
-        city: "Houston",
-        picture: "emily_johnson.jpg",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: userId5,
-        lastname: "Williams",
-        firstname: "James",
-        phone: "7778889999",
-        city: "Phoenix",
-        picture: "james_williams.jpg",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+const userIds = Array(5).fill().map(() => ObjectId());
+const userDetails = [
+    { lastname: "Smith", firstname: "John", phone: "1234567890", city: "New York" },
+    { lastname: "Doe", firstname: "Jane", phone: "0987654321", city: "Los Angeles" },
+    { lastname: "Brown", firstname: "Charlie", phone: "1112223333", city: "Chicago" },
+    { lastname: "Johnson", firstname: "Emily", phone: "4445556666", city: "Houston" },
+    { lastname: "Williams", firstname: "James", phone: "7778889999", city: "Phoenix" }
+];
+db.users.insertMany(userIds.map((id, index) => ({
+    _id: id,
+    ...userDetails[index],
+    picture: `${userDetails[index].firstname.toLowerCase()}_${userDetails[index].lastname.toLowerCase()}.jpg`,
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
 // Insert Comptes
-var compteId1 = ObjectId();
-var compteId2 = ObjectId();
-var compteId3 = ObjectId();
-var compteId4 = ObjectId();
-var compteId5 = ObjectId();
-
-
-// Insert data into new collections
-
-// Insert data into "bloquer" collection
-db.bloquer.insertMany([
-    { _id: ObjectId(), userId: userId1, blockedUserId: userId2,  createdAt: new Date() },
-    { _id: ObjectId(), userId: userId3, blockedUserId: userId4,  createdAt: new Date() }
-]);
-
-// Insert data into "conversioncredit" collection
-db.conversioncredit.insertMany([
-    { _id: ObjectId(), prix: 100, credit: 1, createdAt: new Date() },
-    { _id: ObjectId(), prix: 200, credit: 2, createdAt: new Date() }
-]);
-
-// Insert data into "paiement" collection
-// Insert data into "paiement" collection
-db.paiement.insertMany([
-    { _id: ObjectId(), commande_id: ObjectId("commandeId1"), createdAt: new Date(), updatedAt: new Date() },
-    { _id: ObjectId(), commande_id: ObjectId("commandeId2"), createdAt: new Date(), updatedAt: new Date() }
-]);
-
-// Insert data into "tissu" collection
-db.tissu.insertMany([
-    { _id: ObjectId(), libelle: "Cotton", unite: "m", createdAt: new Date(), updatedAt: new Date() },
-    { _id: ObjectId(), libelle: "Silk", unite: "yard", createdAt: new Date(), updatedAt: new Date() }
-]);
-
-
-// Insert data into "tissupost" collection
-db.tissupost.insertMany([
-    { _id: ObjectId(), tissu_id: ObjectId("someTissuId1"), post_id: ObjectId("somePostId1"), prixMetre: 5.00, nombreMetre: 10, createdAt: new Date(), updatedAt: new Date() },
-    { _id: ObjectId(), tissu_id: ObjectId("someTissuId2"), post_id: ObjectId("somePostId2"), prixMetre: 15.00, nombreMetre: 20, createdAt: new Date(), updatedAt: new Date() }
-]);
-
-// Insert data into "comptes" collection with the new "credit" attribute
-db.comptes.insertMany([
-    {
-        _id: compteId1,
-        email: "john.smith@example.com",
-        password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC",
-        etat: "active",
-        role: "tailleur",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        identifiant: "johnsmith",
-        bio: "I am John Smith",
-        user_id: userId1,
-        comment_ids: [],
-        favorite_ids: [],
-        follower_ids: [],
-        report_ids: [],
-        note_ids: [],
-    },
-    {
-        _id: compteId2,
-        email: "jane.doe@example.com",
-        password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC",
-        etat: "active",
-        role: "client",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        identifiant: "janedoe",
-        bio: "I am Jane Doe",
-        user_id: userId2,
-        comment_ids: [],
-        favorite_ids: [],
-        follower_ids: [],
-        report_ids: [],
-        note_ids: [],
-    },
-    {
-        _id: compteId3,
-        email: "charlie.brown@example.com",
-        password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC",
-        etat: "active",
-        role: "tailleur",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        identifiant: "charliebrown",
-        bio: "I am Charlie Brown",
-        user_id: userId3,
-        comment_ids: [],
-        favorite_ids: [],
-        follower_ids: [],
-        report_ids: [],
-        note_ids: [],
-    },
-    {
-        _id: compteId4,
-        email: "emily.johnson@example.com",
-        password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC",
-        etat: "active",
-        role: "client",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        identifiant: "emilyjohnson",
-        bio: "I am Emily Johnson",
-        user_id: userId4,
-        comment_ids: [],
-        favorite_ids: [],
-        follower_ids: [],
-        report_ids: [],
-        note_ids: [],
-    },
-    {
-        _id: compteId5,
-        email: "james.williams@example.com",
-        password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC",
-        etat: "active",
-        role: "tailleur",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        identifiant: "jameswilliams",
-        bio: "I am James Williams",
-        user_id: userId5,
-        comment_ids: [],
-        favorite_ids: [],
-        follower_ids: [],
-        report_ids: [],
-        note_ids: [],
-    },
-]);
-
-// password pour user : password123
+const compteIds = Array(5).fill().map(() => ObjectId());
+const roles = ["tailleur", "client", "tailleur", "client", "tailleur"];
+db.comptes.insertMany(compteIds.map((id, index) => ({
+    _id: id,
+    email: `${userDetails[index].firstname.toLowerCase()}.${userDetails[index].lastname.toLowerCase()}@example.com`,
+    password: "$2a$10$3pPAMhkyrt/POCAp6A7oIOz49nM1r96RahKhzwdzZ0hH3DV0q4HOC",
+    etat: "active",
+    role: roles[index],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    identifiant: `${userDetails[index].firstname.toLowerCase()}${userDetails[index].lastname.toLowerCase()}`,
+    bio: `I am ${userDetails[index].firstname} ${userDetails[index].lastname}`,
+    user_id: userIds[index],
+    comment_ids: [],
+    favorite_ids: [],
+    follower_ids: [],
+    report_ids: [],
+    note_ids: [],
+    credit: 0
+})));
 
 // Insert Clients
-var clientId2 = ObjectId();
-var clientId4 = ObjectId();
-
-db.clients.insertMany([
-    {
-        compte_id: compteId2,
-        measure_ids: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        compte_id: compteId4,
-        measure_ids: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+const clientIds = [ObjectId(), ObjectId()];
+db.clients.insertMany([1, 3].map((index, i) => ({
+    _id: clientIds[i],
+    compte_id: compteIds[index],
+    measure_ids: [],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
 // Insert Tailleurs
-var tailleurId1 = ObjectId();
-var tailleurId3 = ObjectId();
-var tailleurId5 = ObjectId();
-
-db.tailleurs.insertMany([
-    {
-        _id: tailleurId1,
-        compte_id: compteId1,
-        status_ids: [],
-        post_ids: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: tailleurId3,
-        compte_id: compteId3,
-        status_ids: [],
-        post_ids: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: tailleurId5,
-        compte_id: compteId5,
-        status_ids: [],
-        post_ids: [],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+const tailleurIds = [ObjectId(), ObjectId(), ObjectId()];
+db.tailleurs.insertMany([0, 2, 4].map((index, i) => ({
+    _id: tailleurIds[i],
+    compte_id: compteIds[index],
+    status_ids: [],
+    post_ids: [],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
 // Insert Measures
-var measureId1 = ObjectId();
-var measureId2 = ObjectId();
-
-db.measures.insertMany([
-    {
-        _id: measureId1,
-        Epaule: "40",
-        Manche: "60",
-        Longueur: "70",
-        Poitrine: "90",
-        Fesse: "95",
-        Taille: "85",
-        Cou: "40",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        compte_id: compteId2,
-    },
-    {
-        _id: measureId2,
-        Epaule: "42",
-        Manche: "62",
-        Longueur: "72",
-        Poitrine: "92",
-        Fesse: "97",
-        Taille: "87",
-        Cou: "42",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        compte_id: compteId4,
-    },
-]);
+const measureIds = [ObjectId(), ObjectId()];
+const measureData = [
+    { Epaule: "40", Manche: "60", Longueur: "70", Poitrine: "90", Fesse: "95", Taille: "85", Cou: "40" },
+    { Epaule: "42", Manche: "62", Longueur: "72", Poitrine: "92", Fesse: "97", Taille: "87", Cou: "42" }
+];
+db.measures.insertMany(measureIds.map((id, index) => ({
+    _id: id,
+    ...measureData[index],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    compte_id: compteIds[index * 2 + 1]
+})));
 
 // Update Clients with Measures
-db.clients.updateOne(
-    { compte_id: compteId2 },
-    { $set: { measure_ids: [measureId1] } }
-);
-db.clients.updateOne(
-    { compte_id: compteId4 },
-    { $set: { measure_ids: [measureId2] } }
-);
+db.clients.updateMany({}, { $set: { measure_ids: measureIds } });
 
-// Modification de l'insertion des Posts
-var postId1 = ObjectId();
-var postId3 = ObjectId();
-var postId5 = ObjectId();
-
-// Insert data into "posts" collection with the new "cout" attribute
-db.posts.insertMany([
-    {
-        _id: postId1,
-        content: "Post from John",
-        title: "John's Tailoring",
-        image: ["image"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        shareNb: 10,
-        viewsNb: 100,
-        cout: 2,
-        author_id: tailleurId1,
-        comment_ids: [],
-        like_ids: [],
-        tissus: [],
-    },
-    {
-        _id: postId3,
-        content: "Post from Charlie",
-        title: "Charlie's Tailoring",
-        image: ["image"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        shareNb: 15,
-        viewsNb: 150,
-        cout: 2,
-        author_id: tailleurId3,
-        comment_ids: [],
-        like_ids: [],
-        tissus: [],
-    },
-    {
-        _id: postId5,
-        content: "Post from James",
-        title: "James's Tailoring",
-        image: ["image"],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        shareNb: 20,
-        viewsNb: 200,
-        cout: 2,
-        author_id: tailleurId5,
-        comment_ids: [],
-        like_ids: [],
-        tissus: [],
-    },
-]);
-
+// Insert Posts
+const postIds = [ObjectId(), ObjectId(), ObjectId()];
+db.posts.insertMany([0, 2, 4].map((index, i) => ({
+    _id: postIds[i],
+    content: `Post from ${userDetails[index].firstname}`,
+    title: `${userDetails[index].firstname}'s Tailoring`,
+    image: ["image"],
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    shareNb: 10 + (i * 5),
+    viewsNb: 100 + (i * 50),
+    cout: 2,
+    author_id: tailleurIds[i],
+    comment_ids: [],
+    like_ids: [],
+    tissus: []
+})));
 
 // Insert Statuses
-var statusId1 = ObjectId();
-var statusId3 = ObjectId();
-var statusId5 = ObjectId();
-
-db.status.insertMany([
-    {
-        _id: statusId1,
-        files: "status1.jpg",
-        description: "Status by John",
-        duration: 10,
-        viewsNB: 100,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        categories: "image",
-        tailleur_id: tailleurId1,
-    },
-    {
-        _id: statusId3,
-        files: "status3.jpg",
-        description: "Status by Charlie",
-        duration: 15,
-        viewsNB: 150,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        categories: "image",
-        tailleur_id: tailleurId3,
-    },
-    {
-        _id: statusId5,
-        files: "status5.jpg",
-        description: "Status by James",
-        duration: 20,
-        viewsNB: 200,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        categories: "image",
-        tailleur_id: tailleurId5,
-    },
-]);
+const statusIds = [ObjectId(), ObjectId(), ObjectId()];
+db.status.insertMany([0, 2, 4].map((index, i) => ({
+    _id: statusIds[i],
+    files: `status${i+1}.jpg`,
+    description: `Status by ${userDetails[index].firstname}`,
+    duration: 10 + (i * 5),
+    viewsNB: 100 + (i * 50),
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    categories: "image",
+    tailleur_id: tailleurIds[i]
+})));
 
 // Update Tailleurs with Status and Post References
-db.tailleurs.updateOne(
-    { _id: tailleurId1 },
-    { $set: { status_ids: [statusId1], post_ids: [postId1] } }
-);
-db.tailleurs.updateOne(
-    { _id: tailleurId3 },
-    { $set: { status_ids: [statusId3], post_ids: [postId3] } }
-);
-db.tailleurs.updateOne(
-    { _id: tailleurId5 },
-    { $set: { status_ids: [statusId5], post_ids: [postId5] } }
-);
+db.tailleurs.updateMany({}, { $set: { status_ids: statusIds, post_ids: postIds } });
 
 // Insert Comments
-var commentId1 = ObjectId();
-var commentId3 = ObjectId();
-var commentId5 = ObjectId();
-
-db.comments.insertMany([
-    {
-        _id: commentId1,
-        content: "Comment on John's post",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        post_id: postId1,
-        compte_id: compteId2,
-        commentResponse_ids: [],
-    },
-    {
-        _id: commentId3,
-        content: "Comment on Charlie's post",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        post_id: postId3,
-        compte_id: compteId4,
-        commentResponse_ids: [],
-    },
-    {
-        _id: commentId5,
-        content: "Comment on James's post",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        post_id: postId5,
-        compte_id: compteId2,
-        commentResponse_ids: [],
-    },
-]);
+const commentIds = [ObjectId(), ObjectId(), ObjectId()];
+db.comments.insertMany(commentIds.map((id, index) => ({
+    _id: id,
+    content: `Comment on ${userDetails[index*2].firstname}'s post`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    post_id: postIds[index],
+    compte_id: compteIds[index*2+1],
+    commentResponse_ids: []
+})));
 
 // Update Posts with Comment References
-db.posts.updateOne({ _id: postId1 }, { $set: { comment_ids: [commentId1] } });
-db.posts.updateOne({ _id: postId3 }, { $set: { comment_ids: [commentId3] } });
-db.posts.updateOne({ _id: postId5 }, { $set: { comment_ids: [commentId5] } });
+db.posts.updateMany({}, { $set: { comment_ids: commentIds } });
 
 // Insert Comment Responses
-var commentResponseId1 = ObjectId();
-var commentResponseId2 = ObjectId();
-var commentResponseId3 = ObjectId();
-
-db.commentresponses.insertMany([
-    {
-        _id: commentResponseId1,
-        texte: "Response to comment 1",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        comment_id: commentId1,
-        compte_id: compteId1,
-    },
-    {
-        _id: commentResponseId2,
-        texte: "Response to comment 3",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        comment_id: commentId3,
-        compte_id: compteId3,
-    },
-    {
-        _id: commentResponseId3,
-        texte: "Response to comment 5",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        comment_id: commentId5,
-        compte_id: compteId5,
-    },
-]);
+const commentResponseIds = [ObjectId(), ObjectId(), ObjectId()];
+db.commentresponses.insertMany(commentResponseIds.map((id, index) => ({
+    _id: id,
+    texte: `Response to comment ${index+1}`,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    comment_id: commentIds[index],
+    compte_id: compteIds[index*2]
+})));
 
 // Update Comments with Comment Response References
-db.comments.updateOne(
-    { _id: commentId1 },
-    { $set: { commentResponse_ids: [commentResponseId1] } }
-);
-db.comments.updateOne(
-    { _id: commentId3 },
-    { $set: { commentResponse_ids: [commentResponseId2] } }
-);
-db.comments.updateOne(
-    { _id: commentId5 },
-    { $set: { commentResponse_ids: [commentResponseId3] } }
-);
+db.comments.updateMany({}, { $set: { commentResponse_ids: commentResponseIds } });
 
 // Insert Favorites
-var favoriteId1 = ObjectId();
-var favoriteId2 = ObjectId();
-
-db.favorites.insertMany([
-    {
-        _id: favoriteId1,
-        compte_id: compteId1,
-        post_id: postId3,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: favoriteId2,
-        compte_id: compteId2,
-        post_id: postId5,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+const favoriteIds = [ObjectId(), ObjectId()];
+db.favorites.insertMany(favoriteIds.map((id, index) => ({
+    _id: id,
+    compte_id: compteIds[index*2],
+    post_id: postIds[(index+1) % 3],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
 // Insert Follows
-var followId1 = ObjectId();
-var followId2 = ObjectId();
-
-db.follows.insertMany([
-    {
-        _id: followId1,
-        followed_id: compteId1,
-        follower_id: compteId2,
-        status: "active",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: followId2,
-        followed_id: compteId3,
-        follower_id: compteId4,
-        status: "active",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+const followIds = [ObjectId(), ObjectId()];
+db.follows.insertMany(followIds.map((id, index) => ({
+    _id: id,
+    followed_id: compteIds[index*2],
+    follower_id: compteIds[index*2+1],
+    status: "active",
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
 // Insert Likes
-var likeId1 = ObjectId();
-var likeId2 = ObjectId();
-
-db.likes.insertMany([
-    {
-        _id: likeId1,
-        post_id: postId1,
-        compte_id: compteId1,
-        etat: "liked",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: likeId2,
-        post_id: postId3,
-        compte_id: compteId3,
-        etat: "liked",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+const likeIds = [ObjectId(), ObjectId()];
+db.likes.insertMany(likeIds.map((id, index) => ({
+    _id: id,
+    post_id: postIds[index],
+    compte_id: compteIds[index*2],
+    etat: "liked",
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
 // Insert Messages
-var messageId1 = ObjectId();
-var messageId2 = ObjectId();
-
-db.messages.insertMany([
-    {
-        _id: messageId1,
-        texte: "Hello from John",
-        sender_id: compteId1,
-        receiver_id: compteId2,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: messageId2,
-        texte: "Hello from Charlie",
-        sender_id: compteId3,
-        receiver_id: compteId4,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+const messageIds = [ObjectId(), ObjectId()];
+db.messages.insertMany(messageIds.map((id, index) => ({
+    _id: id,
+    texte: `Hello from ${userDetails[index*2].firstname}`,
+    sender_id: compteIds[index*2],
+    receiver_id: compteIds[index*2+1],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
 // Insert Notes
-var noteId1 = ObjectId();
-var noteId2 = ObjectId();
-
-db.notes.insertMany([
-    {
-        _id: noteId1,
-        note: "Good tailor",
-        who_note_id: compteId2,
-        noted_id: compteId1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: noteId2,
-        note: "Great work",
-        who_note_id: compteId4,
-        noted_id: compteId3,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+const noteIds = [ObjectId(), ObjectId()];
+db.notes.insertMany(noteIds.map((id, index) => ({
+    _id: id,
+    note: index === 0 ? "Good tailor" : "Great work",
+    who_note_id: compteIds[index*2+1],
+    noted_id: compteIds[index*2],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
 // Insert Notifications
-var notificationId1 = ObjectId();
-var notificationId2 = ObjectId();
+const notificationIds = [ObjectId(), ObjectId()];
+db.notifications.insertMany(notificationIds.map((id, index) => ({
+    _id: id,
+    content: index === 0 ? "New comment on your post" : "New like on your post",
+    post_id: postIds[index],
+    compte_id: compteIds[index*2],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
-db.notifications.insertMany([
-    {
-        _id: notificationId1,
-        content: "New comment on your post",
-        post_id: postId1,
-        compte_id: compteId1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: notificationId2,
-        content: "New like on your post",
-        post_id: postId3,
-        compte_id: compteId3,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
-// Insert Bloquer
+// Insert Bloquers
 db.bloquers.insertMany([
-    { blocked_id: compteId2, blocker_id: compteId1, createdAt: new Date(), updatedAt: new Date() },
-    { blocked_id: compteId4, blocker_id: compteId3, createdAt: new Date(), updatedAt: new Date() },
-    { blocked_id: compteId5, blocker_id: compteId1, createdAt: new Date(), updatedAt: new Date() }
+    { blocked_id: compteIds[1], blocker_id: compteIds[0], createdAt: new Date(), updatedAt: new Date() },
+    { blocked_id: compteIds[3], blocker_id: compteIds[2], createdAt: new Date(), updatedAt: new Date() },
+    { blocked_id: compteIds[4], blocker_id: compteIds[0], createdAt: new Date(), updatedAt: new Date() }
 ]);
-// Insert Reports
-var reportId1 = ObjectId();
-var reportId2 = ObjectId();
 
-db.reports.insertMany([
-    {
-        _id: reportId1,
-        motif: "Spam",
-        compte_id: compteId1,
-        reporter_id: compteId2,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: reportId2,
-        motif: "Inappropriate content",
-        compte_id: compteId3,
-        reporter_id: compteId4,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
+// Insert Reports
+const reportIds = [ObjectId(), ObjectId()];
+db.reports.insertMany(reportIds.map((id, index) => ({
+    _id: id,
+    motif: index === 0 ? "Spam" : "Inappropriate content",
+    compte_id: compteIds[index*2],
+    reporter_id: compteIds[index*2+1],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
+
+// Insert Tissus
+const tissuIds = [ObjectId(), ObjectId()];
+db.tissus.insertMany(tissuIds.map((id, index) => ({
+    _id: id,
+    libelle: index === 0 ? "Cotton" : "Silk",
+    unite: index === 0 ? "m" : "yard",
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
+
+// Insert TissuPosts
+const tissuPostIds = [ObjectId(), ObjectId(), ObjectId()];
+db.tissuposts.insertMany(tissuPostIds.map((id, index) => ({
+    _id: id,
+    prixMetre: 15 + (index * 5),
+    nombreMetre: 2 + (index * 0.5),
+    post_id: postIds[index],
+    tissu_id: tissuIds[index % 2],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
+
+// Insert Commandes
+const commandeIds = [ObjectId(), ObjectId(), ObjectId()];
+db.commandes.insertMany(commandeIds.map((id, index) => ({
+    _id: id,
+    tissupost_id: tissuPostIds[index],
+    client_id: compteIds[index % 2 * 2 + 1],
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
+
+// Insert Paiements
+const paiementIds = [ObjectId(), ObjectId()];
+db.paiements.insertMany(paiementIds.map((id, index) => ({
+    _id: id,
+    commande_id: commandeIds[index],
+    montant: 2000 + (index * 1000),
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
+
+// Update Posts with Tissu information
+db.posts.updateMany({}, {
+    $set: {
+        tissus: tissuPostIds.map((id, index) => ({
+            tissu_id: tissuIds[index % 2],
+            prixMetre: 15 + (index * 5),
+            nombreMetre: 2 + (index * 0.5),
+            tissuPost_id: id
+        }))
+    }
+});
 
 // Final updates to link favorites, followers, and other relations in Compte
-db.comptes.updateOne(
-    { _id: compteId1 },
-    {
-        $set: {
-            favorite_ids: [favoriteId1],
-            follower_ids: [followId2],
-            note_ids: [noteId1],
-            comment_ids: [commentId1],
-        },
+db.comptes.updateMany({}, {
+    $set: {
+        favorite_ids: favoriteIds,
+        follower_ids: followIds,
+        note_ids: noteIds,
+        comment_ids: commentIds
     }
-);
-db.comptes.updateOne(
-    { _id: compteId2 },
-    {
-        $set: {
-            favorite_ids: [favoriteId2],
-            follower_ids: [followId1],
-            note_ids: [],
-            comment_ids: [commentId3],
-        },
-    }
-);
-db.comptes.updateOne(
-    { _id: compteId3 },
-    {
-        $set: {
-            favorite_ids: [],
-            follower_ids: [],
-            note_ids: [noteId2],
-            comment_ids: [commentId5],
-        },
-    }
-);
-
-// update collection ******************************************************************************
-
-// Création de la collection Tissu
-db.createCollection("tissus");
-
-var tissuId1 = ObjectId();
-var tissuId2 = ObjectId();
-
-db.tissus.insertMany([
-    {
-        _id: tissuId1,
-        libelle: "Coton",
-        unite: "m",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: tissuId2,
-        libelle: "Soie",
-        unite: "yard",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
-
-// Création de la collection TissuPost
-db.createCollection("tissuposts");
-
-var tissuPostId1 = ObjectId();
-var tissuPostId2 = ObjectId();
-var tissuPostId3 = ObjectId();
-
-db.tissuposts.insertMany([
-    {
-        _id: tissuPostId1,
-        prixMetre: 15,
-        nombreMetre: 2,
-        post_id: postId1,
-        tissu_id: tissuId1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: tissuPostId2,
-        prixMetre: 30,
-        nombreMetre: 1.5,
-        post_id: postId3,
-        tissu_id: tissuId2,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: tissuPostId3,
-        prixMetre: 20,
-        nombreMetre: 3,
-        post_id: postId5,
-        tissu_id: tissuId1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
-
-// Mise à jour des posts avec les informations des tissus
-db.posts.updateOne(
-    { _id: postId1 },
-    {
-        $set: {
-            tissus: [
-                {
-                    tissu_id: tissuId1,
-                    prixMetre: 15,
-                    nombreMetre: 2,
-                    tissuPost_id: tissuPostId1,
-                },
-            ],
-        },
-    }
-);
-
-db.posts.updateOne(
-    { _id: postId3 },
-    {
-        $set: {
-            tissus: [
-                {
-                    tissu_id: tissuId2,
-                    prixMetre: 30,
-                    nombreMetre: 1.5,
-                    tissuPost_id: tissuPostId2,
-                },
-            ],
-        },
-    }
-);
-
-db.posts.updateOne(
-    { _id: postId5 },
-    {
-        $set: {
-            tissus: [
-                {
-                    tissu_id: tissuId1,
-                    prixMetre: 20,
-                    nombreMetre: 3,
-                    tissuPost_id: tissuPostId3,
-                },
-            ],
-        },
-    }
-);
-
+});
