@@ -6,7 +6,7 @@ const CategoriesEnum = ['video', 'image'];
 const PostSchema = new Schema({
     content: String,
     title: String,
-    image: [{ type: String, enum: CategoriesEnum }],
+    image: [{ type: String}],
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     shareNb: Number,

@@ -145,7 +145,8 @@ class TailleurController {
 
     async createPost(req, res) {
         try {
-            const idTailleur = req.id;
+            const idCompte = req.id;
+            // const tailleur = await Tailleur.findOne({compte_id: idCompte});
 
             // Valider les champs
             const {content, title, image, tissus} = req.body;
@@ -162,13 +163,13 @@ class TailleurController {
                 return res.status(400).json({message: "Image must be a non-empty array", status: 'KO'});
             }
 
-            const validCategories = ['video', 'image'];
-            if (!image.every(item => validCategories.includes(item))) {
-                return res.status(400).json({
-                    message: "Image array must only contain 'video' or 'image'",
-                    status: 'KO'
-                });
-            }
+            // const validCategories = ['video', 'image'];
+            // if (!image.every(item => validCategories.includes(item))) {
+            //     return res.status(400).json({
+            //         message: "Image array must only contain 'video' or 'image'",
+            //         status: 'KO'
+            //     });
+            // }
 
             if (!tissus || !Array.isArray(tissus) || tissus.length === 0) {
                 return res.status(400).json({message: "Tissus must be a non-empty array", status: 'KO'});
@@ -176,7 +177,7 @@ class TailleurController {
 
             // Récupérer le tailleur avant de créer le post
 
-            const tailleur = await Tailleur.findOne({compte_id: idTailleur});
+            const tailleur = await Tailleur.findOne({compte_id: idCompte});
             if (!tailleur) {
                 return res.status(404).json({message: "Tailleur not found", status: 'KO'});
             }
@@ -190,7 +191,7 @@ class TailleurController {
                 shareNb: 0,
                 viewsNb: 0,
                 cout: 2,
-                author_id: idTailleur,
+                author_id: tailleur._id,
                 tissus: []
             });
 
@@ -218,7 +219,7 @@ class TailleurController {
                     }
                 });
 
-                res.status(201).json({message: "Post created successfully", status: 'OK', post: newPost});
+               return res.status(201).json({message: "Post created successfully", status: 'OK', post: newPost});
             }
         } catch (err) {
             console.error(err);

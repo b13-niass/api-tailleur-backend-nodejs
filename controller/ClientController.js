@@ -38,13 +38,17 @@ class ClientController {
     async getMyFollowersPost(compte){
         let myFollowersTailleur = [];
         const myFollowers = await Follow.find({
-            _id: {$in: compte.follower_ids}
+            _id: {$in: compte.follower_ids},
+            follower_id: compte._id
         }).populate({
             path: 'followed_id'
         });
 
-        const myFollowersCompte = myFollowers.map(follow => follow.followed_id);
+        const myFollowersCompte = myFollowers
+            .filter(follow => follow.followed_id.etat === 'active')
+            .map(follow => follow.followed_id);
 
+        // return myFollowersCompte;
         for(let i = 0; i < myFollowersCompte.length; i++){
             myFollowersTailleur.push(await Tailleur.findOne({compte_id: myFollowersCompte[i]._id}));
         }
@@ -62,12 +66,15 @@ class ClientController {
 
         let myFollowersTailleur = [];
         const myFollowers = await Follow.find({
-            _id: {$in: compte.follower_ids}
+            _id: {$in: compte.follower_ids},
+            follower_id: compte._id
         }).populate({
             path: 'followed_id'
         });
 
-        const myFollowersCompte = myFollowers.map(follow => follow.followed_id);
+        const myFollowersCompte = myFollowers
+            .filter(follow => follow.followed_id.etat === 'active')
+            .map(follow => follow.followed_id);
 
         for(let i = 0; i < myFollowersCompte.length; i++){
             myFollowersTailleur.push(await Tailleur.findOne({compte_id: myFollowersCompte[i]._id}));
@@ -126,9 +133,9 @@ class ClientController {
                     return differenceInMs <= twentyFourHoursInMs; // Vérifier si la différence est inférieure ou égale à 24 heures
                 });
 
-                // return res.json(recentStatus);
 
                 const myFollowersPost = await this.getMyFollowersPost(compte);
+                // return res.json(myFollowersPost);
                 const posts = myOwnPost.concat(myFollowersPost);
 
                 const myFollowersRecentStatus = await this.getMyFollowersRecentStatus(compte);
