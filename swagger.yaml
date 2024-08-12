@@ -104,6 +104,34 @@ paths:
                   message:
                     type: string
                     example: "Une erreur interne s'est produite."
+  /api/v1/client/unlike:
+    delete:
+      summary: Désignaler un utilisateur
+      tags:
+        - Utilisateurs
+      requestBody:
+        description: Données nécessaires pour supprimer un like ou un dislike.
+        required: true
+        content: 
+          Application/json:
+            shema: 
+              type: object
+              properties:
+                postId:
+                  type: string
+                  description: ID du post pour lequel le like ou le dislike doit être supprimé.
+                  example: "66ba2d393914cebca4eb2102"
+                compteId:
+                  type: string
+                  description: ID du compte utilisateur qui a effectué le like ou le dislike.
+                  example: "66ba2d383914cebca4eb20f6"
+                etat:
+                  type: string
+                  description: État de l'interaction ('like' ou 'dislike').
+                  example: "like"
+      responses:
+        '200':
+          description: Like ou dislike supprimé avec succès.
 
   /api/v1/login:
     post:
@@ -139,6 +167,40 @@ paths:
               schema:
                 type: object
                 properties:
+                  message:
+                    type: string
+                    example: "Like supprimé avec succès."
+                  status:
+                    type: string
+                    example: "OK"
+        '400':
+          description: Requête invalide (état incorrect ou données manquantes).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "État invalide."
+                  status:
+                    type: string
+                    example: "KO"
+        '404':
+          description: Like ou dislike non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Like non trouvé."
+                  status:
+                    type: string
+                    example: "KO"
+        '500':
+          description: Erreur interne du serveur.
                   token:
                     type: string
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
@@ -157,6 +219,30 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Une erreur interne s'est produite."
+                  status:
+                    type: string
+                    example: "KO"
+  /api/v1/client/accueil/search:
+    post:
+      summary: Rechercher des utilisateurs, des comptes et des posts
+      tags:
+        - Recherche
+      requestBody:
+        description: Données nécessaires pour effectuer une recherche.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                searchText:
+                  type: string
+                  description: Texte à rechercher dans les utilisateurs, comptes et posts.
+                  example: "John"
+      responses:
+        '200':
+          description: Résultats de la recherche retournés avec succès.
                     example: "Utilisateur non trouvé."
                   status:
                     type: string
@@ -179,6 +265,48 @@ paths:
               schema:
                 type: object
                 properties:
+                  comptes:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          description: Identifiant du compte.
+                        email:
+                          type: string
+                          description: Adresse email du compte.
+                        identifiant:
+                          type: string
+                          description: Identifiant unique du compte.
+                        role:
+                          type: string
+                          description: Rôle du compte.
+                        etat:
+                          type: string
+                          description: État du compte.
+                  posts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                          description: Identifiant du post.
+                        title:
+                          type: string
+                          description: Titre du post.
+                        content:
+                          type: string
+                          description: Contenu du post.
+                  message:
+                    type: string
+                    example: "Résultats de la recherche"
+                  status:
+                    type: string
+                    example: "OK"
+        '500':
+          description: Erreur lors de la recherche (aucun résultat trouvé ou erreur serveur).
                   message:
                     type: string
                     example: "Votre compte est désactivé."
@@ -194,6 +322,17 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Aucun résultat trouvé ou erreur serveur."
+                  status:
+                    type: string
+                    example: "KO"
+  /api/v1/client/posts/comment:
+    post:
+      summary: Ajouter une réponse à un commentaire
+      tags:
+        - Commentaires
+      requestBody:
+        description: Données nécessaires pour ajouter une réponse à un commentaire.
                     example: "Erreur lors de la connexion."
 
   /api/v1/client/favorites/add:
@@ -211,6 +350,25 @@ paths:
             schema:
               type: object
               properties:
+                content:
+                  type: string
+                  description: Texte de la réponse au commentaire.
+                  example: "Merci pour votre commentaire !"
+                idComment:
+                  type: string
+                  description: Identifiant du commentaire auquel la réponse est ajoutée.
+                  example: "66b776e25f1c3fb4598505e1"
+                idCompte:
+                  type: string
+                  description: Identifiant du compte utilisateur ajoutant la réponse.
+                  example: "66b776e15f1c3fb4598505cd"
+              required:
+                - content
+                - idComment
+                - idCompte
+      responses:
+        '200':
+          description: Réponse ajoutée avec succès.
                 compte_id:
                   type: string
                   description: Identifiant du client (doit être de type ObjectId en MongoDB).
@@ -230,6 +388,50 @@ paths:
               schema:
                 type: object
                 properties:
+                  commentResponse:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        description: Identifiant de la réponse au commentaire.
+                      texte:
+                        type: string
+                        description: Texte de la réponse au commentaire.
+                      compte_id:
+                        type: string
+                        description: Identifiant du compte utilisateur.
+                      comment_id:
+                        type: string
+                        description: Identifiant du commentaire.
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date de création de la réponse.
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        description: Date de la dernière mise à jour de la réponse.
+                  message:
+                    type: string
+                    example: "Réponse ajoutée"
+                  status:
+                    type: string
+                    example: "OK"
+        '404':
+          description: Commentaire non trouvé ou erreur lors de l'ajout de la réponse.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Commentaire non trouvé"
+                  status:
+                    type: string
+                    example: "KO"
+        '400':
+          description: Erreur de validation des données fournies.
                   favorite:
                     type: object
                     properties:
@@ -265,6 +467,17 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Texte de la réponse manquant ou invalide"
+                  status:
+                    type: string
+                    example: "KO"
+
+    delete:
+      summary: Supprimer une réponse à un commentaire
+      tags:
+        - Commentaires
+      requestBody:
+        description: Données nécessaires pour supprimer une réponse à un commentaire.
                     example: 'Erreur interne du serveur'
                   status:
                     type: string
@@ -285,6 +498,15 @@ paths:
             schema:
               type: object
               properties:
+                idCommentResponse:
+                  type: string
+                  description: Identifiant de la réponse à supprimer.
+                  example: "66b776e25f1c3fb4598505e6"
+              required:
+                - idCommentResponse
+      responses:
+        '200':
+          description: Réponse de commentaire supprimée avec succès.
                 compte_id:
                   type: string
                   description: Identifiant du compte (doit être de type ObjectId en MongoDB).
@@ -318,6 +540,12 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Réponse de commentaire supprimée"
+                  status:
+                    type: string
+                    example: "OK"
+        '404':
+          description: Réponse de commentaire non trouvée.
                     example: "Favori supprimé avec succès."
         '400':
           description: Requête invalide (ID du compte ou du favori invalide).
@@ -338,6 +566,12 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Réponse de commentaire non trouvée"
+                  status:
+                    type: string
+                    example: "KO"
+        '400':
+          description: Erreur lors de la suppression de la réponse.
                     example: "Favori non trouvé ou déjà supprimé."
         '500':
           description: Erreur lors de la suppression du favori.
@@ -348,6 +582,17 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Erreur lors de la suppression de la réponse"
+                  status:
+                    type: string
+                    example: "KO"
+  /api/v1/client/posts/comment/reponse:
+    post:
+      summary: Ajouter une réponse à un commentaire
+      tags:
+        - Commentaires
+      requestBody:
+        description: Données nécessaires pour ajouter une réponse à un commentaire.
                     example: "Erreur lors de la suppression du favori."
 
 
@@ -366,6 +611,25 @@ paths:
             schema:
               type: object
               properties:
+                content:
+                  type: string
+                  description: Texte de la réponse au commentaire.
+                  example: "Merci pour votre commentaire !"
+                idComment:
+                  type: string
+                  description: Identifiant du commentaire auquel la réponse est ajoutée.
+                  example: "605c72ef1c3e0f001f64762d"
+                idCompte:
+                  type: string
+                  description: Identifiant du compte utilisateur ajoutant la réponse.
+                  example: "605c72ef1c3e0f001f64762e"
+              required:
+                - content
+                - idComment
+                - idCompte
+      responses:
+        '200':
+          description: Réponse ajoutée avec succès.
                 id:
                   type: string
                   description: Identifiant du compte à signaler (doit être de type ObjectId en MongoDB).
@@ -385,6 +649,37 @@ paths:
               schema:
                 type: object
                 properties:
+                  commentResponse:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                        description: Identifiant de la réponse au commentaire.
+                      texte:
+                        type: string
+                        description: Texte de la réponse au commentaire.
+                      compte_id:
+                        type: string
+                        description: Identifiant du compte utilisateur.
+                      comment_id:
+                        type: string
+                        description: Identifiant du commentaire.
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date de création de la réponse.
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        description: Date de la dernière mise à jour de la réponse.
+                  message:
+                    type: string
+                    example: "Réponse ajoutée"
+                  status:
+                    type: string
+                    example: "OK"
+        '404':
+          description: Commentaire non trouvé ou erreur lors de l'ajout de la réponse.
                   message:
                     type: string
                     example: "Compte signalé avec succès."
@@ -422,6 +717,12 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Commentaire non trouvé"
+                  status:
+                    type: string
+                    example: "KO"
+        '400':
+          description: Erreur de validation des données fournies.
                     example: "Compte non trouvé."
         '500':
           description: Erreur lors du signalement du compte.
@@ -432,6 +733,17 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Texte de la réponse manquant ou invalide"
+                  status:
+                    type: string
+                    example: "KO"
+
+    delete:
+      summary: Supprimer une réponse à un commentaire
+      tags:
+        - Commentaires
+      requestBody:
+        description: Données nécessaires pour supprimer une réponse à un commentaire.
                     example: "Erreur lors du signalement du compte."
   /api/v1/client/messages:
     get:
@@ -449,6 +761,15 @@ paths:
             schema:
               type: object
               properties:
+                idCommentResponse:
+                  type: string
+                  description: Identifiant de la réponse à supprimer.
+                  example: "605c72ef1c3e0f001f64762f"
+              required:
+                - idCommentResponse
+      responses:
+        '200':
+          description: Réponse de commentaire supprimée avec succès.
                 clientId:
                   type: string
                   description: Identifiant du client dont les messages doivent être récupérés.
@@ -490,6 +811,12 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Réponse de commentaire supprimée"
+                  status:
+                    type: string
+                    example: "OK"
+        '404':
+          description: Réponse de commentaire non trouvée.
                     example: "ID du client invalide."
                   status:
                     type: string
@@ -520,6 +847,12 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Réponse de commentaire non trouvée"
+                  status:
+                    type: string
+                    example: "KO"
+        '400':
+          description: Erreur lors de la suppression de la réponse.
                     example: "Aucun message trouvé."
                   status:
                     type: string
@@ -539,6 +872,17 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Erreur lors de la suppression de la réponse"
+                  status:
+                    type: string
+                    example: "KO"
+  /api/v1/client/note:
+    post:
+      summary: Ajouter une note à un compte
+      tags:
+        - Notes
+      requestBody:
+        description: Données nécessaires pour ajouter une note à un compte.
                     example: "Erreur interne du serveur."
                   status:
                     type: string
@@ -558,6 +902,25 @@ paths:
             schema:
               type: object
               properties:
+                who_note_id:
+                  type: string
+                  description: Identifiant de l'utilisateur qui ajoute la note.
+                  example: "605c72ef1c3e0f001f64762d"
+                noted_id:
+                  type: string
+                  description: Identifiant de l'utilisateur qui reçoit la note.
+                  example: "605c72ef1c3e0f001f64762e"
+                rating:
+                  type: integer
+                  description: Note attribuée, qui doit être un nombre entier.
+                  example: 5
+              required:
+                - who_note_id
+                - noted_id
+                - rating
+      responses:
+        '201':
+          description: Note ajoutée avec succès.
                 senderId:
                   type: string
                   description: Identifiant de l'expéditeur.
@@ -580,6 +943,32 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Note ajoutée avec succès."
+                  note:
+                    type: object
+                    properties:
+                      who_note_id:
+                        type: string
+                        description: Identifiant de l'utilisateur qui a ajouté la note.
+                      noted_id:
+                        type: string
+                        description: Identifiant de l'utilisateur noté.
+                      rating:
+                        type: integer
+                        description: Note attribuée.
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date de création de la note.
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        description: Date de la dernière mise à jour de la note.
+                  status:
+                    type: string
+                    example: "OK"
+        '400':
+          description: Erreur de validation des données fournies.
                     example: "Message envoyé avec succès."
                   data:
                     type: object
@@ -618,6 +1007,14 @@ paths:
               schema:
                 type: object
                 properties:
+                  error:
+                    type: string
+                    example: "Les champs who_note_id, noted_id et rating sont requis, et rating doit être un nombre."
+                  status:
+                    type: string
+                    example: "KO"
+        '500':
+          description: Erreur serveur interne.
                   message:
                     type: string
                     example: "ID de l’expéditeur ou du destinataire invalide."
@@ -637,6 +1034,71 @@ paths:
               schema:
                 type: object
                 properties:
+                  error:
+                    type: string
+                    example: "Erreur lors de l'ajout de la note."
+                  status:
+                    type: string
+                    example: "KO"
+  /api/v1/client/mesure:
+    post:
+      summary: Ajouter une mesure pour un compte
+      tags: 
+        - mesure
+      requestBody:
+      description: Données nécessaires pour ajouter une mesure pour un compte.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              Epaule:
+                  type: number
+                  format: float
+                  description: Mesure de l'épaule.
+                  example: 42.5
+              Manche:
+                type: number
+                format: float
+                description: Mesure de la manche.
+                example: 37.5
+              Longueur:
+                type: number
+                format: float
+                description: Mesure de la longueur.
+                example: 100
+              Poitrine:
+                type: number
+                format: float
+                description: Mesure de la poitrine.
+                example: 55
+              Fesse:
+                type: number
+                format: float
+                description: Mesure de la fesse.
+                example: 35
+              Taille:
+                type: number
+                format: float
+                description: Mesure de la taille.
+                example: 175
+              Coup:
+                type: number
+                format: float
+                description: Mesure du coup.
+                example: 25
+            required:
+                - Epaule
+                - Manche
+                - Longueur
+                - Poitrine
+                - Fesse
+                - Taille
+                - Cou
+      responses:
+        '201':
+          description: Mesure ajoutée avec succès.
                   message:
                     type: string
                     example: "Erreur lors de l'envoi du message."
@@ -780,6 +1242,63 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Measure added successfully"
+                  measure:
+                    type: object
+                    properties:
+                      Epaule:
+                        type: number
+                        format: float
+                      Manche:
+                        type: number
+                        format: float
+                      Longueur:
+                        type: number
+                        format: float
+                      Poitrine:
+                        type: number
+                        format: float
+                      Fesse:
+                        type: number
+                        format: float
+                      Taille:
+                        type: number
+                        format: float
+                      Cou:
+                        type: number
+                        format: float
+                      compte_id:
+                        type: string
+                        description: Identifiant du compte utilisateur.
+                      _id:
+                        type: string
+                        description: Identifiant unique de la mesure.
+                      createdAt:
+                        type: string
+                        format: date-time
+                        description: Date de création de la mesure.
+                      updatedAt:
+                        type: string
+                        format: date-time
+                        description: Date de la dernière mise à jour de la mesure.
+                  status:
+                    type: string
+                    example: "OK"
+        '400':
+          description: Erreur de validation des données fournies.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Epaule must be a positive number"
+                  status:
+                    type: string
+                    example: "KO"
+        '401':
+          description: Utilisateur non authentifié.
                     example: "Dislike ajouté avec succès."
                   data:
                     type: object
@@ -819,6 +1338,12 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "User not authenticated"
+                  status:
+                    type: string
+                    example: "KO"
+        '500':
+          description: Erreur serveur interne.
                     example: "Le dislike est déjà enregistré ou les données sont manquantes."
                   status:
                     type: string
@@ -833,6 +1358,13 @@ paths:
                 properties:
                   message:
                     type: string
+                    example: "Error adding measure"
+                  error:
+                    type: string
+                    example: "Detailed error message"
+                  status:
+                    type: string
+                    example: "KO"
                     example: "Erreur interne du serveur."
                   status:
                     type: string
