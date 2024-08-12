@@ -5,7 +5,7 @@ info:
   description: API permettant de créer un compte utilisateur.
 
 servers:
-  - url: https://projet-tailleur-backend-o3ya4lvqe.vercel.app
+  - url: https://projet-tailleur-backend.vercel.app
 
 paths:
   /api/v1/register:
