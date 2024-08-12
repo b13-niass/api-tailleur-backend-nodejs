@@ -268,118 +268,34 @@ db.commandes.insertMany(commandeIds.map((id, index) => ({
     updatedAt: new Date()
 })));
 
-// Création de la collection TissuPost
-db.createCollection("tissuposts");
+// Insert Paiements
+const paiementIds = [ObjectId(), ObjectId()];
+db.paiements.insertMany(paiementIds.map((id, index) => ({
+    _id: id,
+    commande_id: commandeIds[index],
+    montant: 2000 + (index * 1000),
+    createdAt: new Date(),
+    updatedAt: new Date()
+})));
 
-var tissuPostId1 = ObjectId();
-var tissuPostId2 = ObjectId();
-var tissuPostId3 = ObjectId();
-
-db.tissuposts.insertMany([
-    {
-        _id: tissuPostId1,
-        prixMetre: 15,
-        nombreMetre: 2,
-        post_id: postId1,
-        tissu_id: tissuId1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: tissuPostId2,
-        prixMetre: 30,
-        nombreMetre: 1.5,
-        post_id: postId3,
-        tissu_id: tissuId2,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: tissuPostId3,
-        prixMetre: 20,
-        nombreMetre: 3,
-        post_id: postId5,
-        tissu_id: tissuId1,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-]);
-
-// Mise à jour des posts avec les informations des tissus
-db.posts.updateOne(
-    { _id: postId1 },
-    {
-        $set: {
-            tissus: [
-                {
-                    tissu_id: tissuId1,
-                    prixMetre: 15,
-                    nombreMetre: 2,
-                    tissuPost_id: tissuPostId1,
-                },
-            ],
-        },
+// Update Posts with Tissu information
+db.posts.updateMany({}, {
+    $set: {
+        tissus: tissuPostIds.map((id, index) => ({
+            tissu_id: tissuIds[index % 2],
+            prixMetre: 15 + (index * 5),
+            nombreMetre: 2 + (index * 0.5),
+            tissuPost_id: id
+        }))
     }
-);
+});
 
-db.posts.updateOne(
-    { _id: postId3 },
-    {
-        $set: {
-            tissus: [
-                {
-                    tissu_id: tissuId2,
-                    prixMetre: 30,
-                    nombreMetre: 1.5,
-                    tissuPost_id: tissuPostId2,
-                },
-            ],
-        },
+// Final updates to link favorites, followers, and other relations in Compte
+db.comptes.updateMany({}, {
+    $set: {
+        favorite_ids: favoriteIds,
+        follower_ids: followIds,
+        note_ids: noteIds,
+        comment_ids: commentIds
     }
-);
-
-db.posts.updateOne(
-    { _id: postId5 },
-    {
-        $set: {
-            tissus: [
-                {
-                    tissu_id: tissuId1,
-                    prixMetre: 20,
-                    nombreMetre: 3,
-                    tissuPost_id: tissuPostId3,
-                },
-            ],
-        },
-    }
-)
-// Création de la collection commandes
-db.createCollection("commandes");
-
-var commandeId1 = ObjectId();
-var commandeId2 = ObjectId();
-var commandeId3 = ObjectId();
-
-db.commandes.insertMany([
-    {
-        _id: commandeId1,
-        tissupost_id: tissuPostId1,
-        client_id: clientId2,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: commandeId2,
-        tissupost_id: tissuPostId2,
-        client_id: clientId2,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    },
-    {
-        _id: commandeId3,
-        tissupost_id: tissuPostId3,
-        client_id: clientId4,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-    }
-])
+});
