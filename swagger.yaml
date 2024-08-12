@@ -31,7 +31,7 @@ paths:
                 confirm_password:
                   type: string
                   format: password
-                  description: Mot de passe de l'utilisateur.
+                  description: Mot de passe de confirmation.
                   example: "Passw0rd!"
                 firstName:
                   type: string
@@ -43,8 +43,8 @@ paths:
                   example: "Doe"
                 role:
                   type: string
-                  description: Role de l'utilisateur.
-                  example: "Doe"
+                  description: Rôle de l'utilisateur.
+                  example: "user"
                 phone:
                   type: string
                   description: Téléphone de l'utilisateur.
@@ -104,6 +104,613 @@ paths:
                   message:
                     type: string
                     example: "Une erreur interne s'est produite."
+
+  /api/v1/login:
+    post:
+      summary: Authentifier un utilisateur
+      tags:
+        - Utilisateurs
+      requestBody:
+        description: Données nécessaires pour authentifier un utilisateur.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Adresse email de l'utilisateur.
+                  example: "johndoe@example.com"
+                password:
+                  type: string
+                  format: password
+                  description: Mot de passe de l'utilisateur.
+                  example: "Passw0rd!"
+              required:
+                - email
+                - password
+      responses:
+        '200':
+          description: Connexion réussie.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  status:
+                    type: string
+                    example: "OK"
+                  message:
+                    type: string
+                    example: "Connexion réussie"
+        '404':
+          description: Utilisateur non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Utilisateur non trouvé."
+                  status:
+                    type: string
+                    example: "KO"
+        '403':
+          description: Compte désactivé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Votre compte est désactivé."
+                  status:
+                    type: string
+                    example: "KO"
+        '500':
+          description: Erreur lors de la connexion.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Erreur lors de la connexion."
+
+  /api/v1/client/favorites/add:
+    post:
+      summary: Ajouter un client à vos favoris
+      tags:
+        - Utilisateurs/favorites
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Données nécessaires pour ajouter un client aux favoris.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                compte_id:
+                  type: string
+                  description: Identifiant du client (doit être de type ObjectId en MongoDB).
+                  example: "605c72ef7d3b3d001f647a4e"
+                post_id:
+                  type: string
+                  description: Identifiant du post à ajouter aux favoris (doit être de type ObjectId en MongoDB).
+                  example: "605c72ef7d3b3d001f647a4f"
+              required:
+                - compte_id
+                - post_id
+      responses:
+        '201':
+          description: Favori ajouté avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  favorite:
+                    type: object
+                    properties:
+                      compte_id:
+                        type: string
+                      post_id:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                  status:
+                    type: string
+                    example: 'OK'
+        '500':
+          description: Erreur lors de l'ajout du favori.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Erreur interne du serveur'
+                  status:
+                    type: string
+                    example: 'KO'
+  
+  /api/v1/client/favorites/delete:
+    delete:
+      summary: Supprimer un client de vos favoris
+      tags:
+        - Utilisateurs/favorites
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Données nécessaires pour supprimer un client des favoris.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                compte_id:
+                  type: string
+                  description: Identifiant du compte (doit être de type ObjectId en MongoDB).
+                  example: "605c72ef7d3b3d001f647a4e"
+                favorite_id:
+                  type: string
+                  description: Identifiant du favori à supprimer (doit être de type ObjectId en MongoDB).
+                  example: "605c72ef7d3b3d001f647a4f"
+              required:
+                - compte_id
+                - favorite_id
+      responses:
+        '200':
+          description: Favori supprimé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Favori supprimé avec succès."
+        '400':
+          description: Requête invalide (ID du compte ou du favori invalide).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "ID du compte ou ID du favori invalide."
+        '404':
+          description: Favori non trouvé ou déjà supprimé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Favori non trouvé ou déjà supprimé."
+        '500':
+          description: Erreur lors de la suppression du favori.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Erreur lors de la suppression du favori."
+
+
+  /api/v1/client/compte/report:
+    post:
+      summary: Signaler un compte
+      tags:
+        - Utilisateurs/signaler
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Données nécessaires pour signaler un compte.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: Identifiant du compte à signaler (doit être de type ObjectId en MongoDB).
+                  example: "605c72ef7d3b3d001f647a4e"
+                motif:
+                  type: string
+                  description: Motif du signalement.
+                  example: "Comportement abusif"
+              required:
+                - id
+                - motif
+      responses:
+        '201':
+          description: Compte signalé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Compte signalé avec succès."
+                  rapport:
+                    type: object
+                    properties:
+                      motif:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                      compte_id:
+                        type: string
+                      reporter_id:
+                        type: string
+        '400':
+          description: Requête invalide (données manquantes ou incorrectes).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "ID utilisateur ou motif invalide."
+        '404':
+          description: Compte non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Compte non trouvé."
+        '500':
+          description: Erreur lors du signalement du compte.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Erreur lors du signalement du compte."
+  /api/v1/client/messages:
+    get:
+      summary: Lister les messages d'un client
+      tags:
+        - Messages/Utilisataur
+        
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Données nécessaires pour récupérer la liste des messages d'un client.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  description: Identifiant du client dont les messages doivent être récupérés.
+                  example: "605c72ef7d3b3d001f647a4e"
+      responses:
+        '200':
+          description: Liste des messages récupérée avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        texte:
+                          type: string
+                        sender_id:
+                          type: string
+                        receiver_id:
+                          type: string
+                        createdAt:
+                          type: string
+                          format: date-time
+                        updatedAt:
+                          type: string
+                          format: date-time
+                  status:
+                    type: string
+                    example: 'OK'
+        '400':
+          description: ID du client invalide.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "ID du client invalide."
+                  status:
+                    type: string
+                    example: "KO"
+        '404':
+          description: Aucun message trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Aucun message trouvé."
+                  status:
+                    type: string
+                    example: "KO"
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Erreur interne du serveur."
+                  status:
+                    type: string
+                    example: "KO"
+
+    post:
+      summary: Envoyer un nouveau message
+      tags:
+        - Messages/Utilisataur
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Données nécessaires pour envoyer un nouveau message.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                senderId:
+                  type: string
+                  description: Identifiant de l'expéditeur.
+                  example: "605c72ef7d3b3d001f647a4e"
+                receiverId:
+                  type: string
+                  description: Identifiant du destinataire.
+                  example: "605c72ef7d3b3d001f647a4f"
+                texte:
+                  type: string
+                  description: Texte du message.
+                  example: "Bonjour, comment allez-vous ?"
+      responses:
+        '201':
+          description: Message envoyé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Message envoyé avec succès."
+                  data:
+                    type: object
+                    properties:
+                      texte:
+                        type: string
+                      sender_id:
+                        type: string
+                      receiver_id:
+                        type: string
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                  status:
+                    type: string
+                    example: 'OK'
+        '400':
+          description: ID de l’expéditeur ou du destinataire invalide.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "ID de l’expéditeur ou du destinataire invalide."
+                  status:
+                    type: string
+                    example: "KO"
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Erreur lors de l'envoi du message."
+                  status:
+                    type: string
+                    example: "KO"    
+  /api/v1/client/like:
+    post:
+      summary: Ajouter un like à un post
+      tags:
+        - Reactions
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Données nécessaires pour ajouter un like.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                postId:
+                  type: string
+                  description: ID du post à liker.
+                  example: "605c72ef7d3b3d001f647a4f"
+                compteId:
+                  type: string
+                  description: ID du compte qui like le post.
+                  example: "605c72ef7d3b3d001f647a4e"
+      responses:
+        '201':
+          description: Like ajouté avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Like ajouté avec succès."
+                  status:
+                    type: string
+                    example: 'OK'
+        '400':
+          description: Requête invalide (like déjà existant ou données manquantes).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Le like est déjà enregistré ou les données sont manquantes."
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Erreur interne du serveur."
+  
+  /api/v1/client/dislike:
+    post:
+      summary: Ajouter un dislike à un post
+      tags:
+        - Reactions
+      security:
+        - bearerAuth: []
+      requestBody:
+        description: Données nécessaires pour ajouter un dislike.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                postId:
+                  type: string
+                  description: ID du post à disliker.
+                  example: "605c72ef7d3b3d001f647a4f"
+                compteId:
+                  type: string
+                  description: ID du compte qui dislike le post.
+                  example: "605c72ef7d3b3d001f647a4e"
+      responses:
+        '201':
+          description: Dislike ajouté avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Dislike ajouté avec succès."
+                  data:
+                    type: object
+                    properties:
+                      _id:
+                        type: string
+                      post_id:
+                        type: string
+                      compte_id:
+                        type: string
+                      etat:
+                        type: string
+                        example: "dislike"
+                      createdAt:
+                        type: string
+                        format: date-time
+                      updatedAt:
+                        type: string
+                        format: date-time
+                  status:
+                    type: string
+                    example: 'OK'
+        '400':
+          description: Requête invalide (dislike déjà existant ou données manquantes).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Le dislike est déjà enregistré ou les données sont manquantes."
+                  status:
+                    type: string
+                    example: 'KO'
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Erreur interne du serveur."
+                  status:
+                    type: string
+                    example: 'KO'
+
+               
+
 components:
   securitySchemes:
     bearerAuth:
