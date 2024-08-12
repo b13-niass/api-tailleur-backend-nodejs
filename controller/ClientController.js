@@ -1074,7 +1074,6 @@ class ClientController {
         }
     }
 
-
     async bloquer(req, res) {
 
         try {
@@ -1124,7 +1123,6 @@ class ClientController {
             res.status(500).json({message: 'Erreur lors du blocage de l\'utilisateur', status: 'KO'});
         }
     }
-
 }
 
 export default new ClientController();

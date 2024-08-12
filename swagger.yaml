@@ -1,0 +1,112 @@
+openapi: 3.0.0
+info:
+  title: API de Gestion des Utilisateurs
+  version: 1.0.0
+  description: API permettant de créer un compte utilisateur.
+
+paths:
+  /api/v1/register:
+    post:
+      summary: Créer un nouveau compte utilisateur
+      tags:
+        - Utilisateurs
+      requestBody:
+        description: Données nécessaires pour créer un nouveau compte utilisateur.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Adresse email de l'utilisateur.
+                  example: "johndoe@example.com"
+                password:
+                  type: string
+                  format: password
+                  description: Mot de passe de l'utilisateur.
+                  example: "Passw0rd!"
+                confirm_password:
+                  type: string
+                  format: password
+                  description: Mot de passe de l'utilisateur.
+                  example: "Passw0rd!"
+                firstName:
+                  type: string
+                  description: Prénom de l'utilisateur.
+                  example: "John"
+                lastName:
+                  type: string
+                  description: Nom de famille de l'utilisateur.
+                  example: "Doe"
+                role:
+                  type: string
+                  description: Role de l'utilisateur.
+                  example: "Doe"
+                phone:
+                  type: string
+                  description: Téléphone de l'utilisateur.
+                  example: "+1 123-456-7890"
+                city:
+                  type: string
+                  description: Ville de l'utilisateur.
+                  example: "New York"
+                picture:
+                  type: string
+                  description: Chemin d'accès à l'image de l'utilisateur.
+                identifiant:
+                  type: string
+                  description: Identifiant unique de l'utilisateur.
+                  example: "john_doe"
+      responses:
+        '201':
+          description: Compte utilisateur créé avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Compte utilisateur créé avec succès."
+                  status:
+                    type: string
+                    example: "Valider"
+        '400':
+          description: Requête invalide (données manquantes ou incorrectes).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Les données fournies sont invalides."
+        '409':
+          description: Conflit - Nom d'utilisateur ou email déjà utilisé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Nom d'utilisateur ou email déjà utilisé."
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Une erreur interne s'est produite."
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

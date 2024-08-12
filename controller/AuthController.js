@@ -83,11 +83,11 @@ class AuthController {
                 ]
             });
             if (existingCompte) {
-                return res.status(400).json({message: 'Ce compte existe déjà', status: 'KO',});
+                return res.status(409).json({message: 'Ce compte existe déjà', status: 'KO',});
             }
             const existingUser = await User.findOne({phone});
             if (existingUser){
-                return res.status(400).json({message: 'Ce compte existe déjà', status: 'KO',});
+                return res.status(409).json({message: 'Ce compte existe déjà', status: 'KO',});
             }
 
             if (password !== confirm_password){
