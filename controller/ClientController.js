@@ -1053,64 +1053,24 @@ class ClientController {
     }
 
     async getSomeProfile(req, res) {
-        const {identifiant} = req.params.identifiant;
+        const {identifiant} = req.params;
+        // return res.json(identifiant);
         const idCompte = req.id;
         const monCompte = await Compte.findById(idCompte);
 
         const compte = await Compte.findOne({identifiant});
+        // return res.json(compte);
         const user = await User.findOne({_id: compte.user_id});
-        let isMyFollower = false;
-        let searhIfFollower = null;
-
-        if (monCompte.role === 'tailleur') {
-            searhIfFollower = await Follow.findOne({
-                $or: [
-                    {
-                        follower_id: idCompte,
-                        followed_id: compte._id
-                    },
-                    {
-                        follower_id: compte._id,
-                        followed_id: idCompte
-                    },
-                ]
-            })
-        } else {
-            searhIfFollower = await Follow.findOne({
-                follower_id: idCompte,
-                followed_id: compte._id
-            })
-        }
-
-        isMyFollower = searhIfFollower ? true : false;
-
 
         if (compte.role === 'tailleur') {
             const tailleur = await Tailleur.findOne({compte_id: compte._id});
 
             const posts = await Post.find({author_id: tailleur._id});
-
-            return res.json({user, compte, posts, isMyFollower, message: "Profile de l'utilisateur", status: 'OK'});
+            return res.json({user, compte, posts, message: "Profile de l'utilisateur", status: 'OK'});
         }
         if (compte.role === 'client') {
-            const posts = await compte.find()
-                .populate({
-                    path: 'follower_ids',
-                    populate: {
-                        path: 'followed_id',
-                        match: {etat: 'active'}
-                    }
-                })
-                .populate({
-                    path: 'compte_id',
-                    model: 'Tailleur'
-                })
-                .populate({
-                    path: 'author_id',
-                    model: 'Post',
-                    options: {sort: {createdAt: -1}}
-                });
-            return res.json({user, compte, posts, isMyFollower, message: "Profile de l'utilisateur", status: 'OK'});
+            const herFollowersPost = await this.getMyFollowersPost(compte);
+            return res.json({user, compte, herFollowersPost, message: "Profile de l'utilisateur", status: 'OK'});
         }
     }
 
