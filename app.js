@@ -1,5 +1,8 @@
 import express from "express";
 import "dotenv/config";
+import { v2 as cloudinary } from 'cloudinary';
+import fileUpload from "express-fileupload";
+
 import dbConnection from "./config/db.js";
 import { router as authRoutes } from "./routes/auth.js";
 import { router as clientRoutes } from "./routes/client.js";
@@ -12,6 +15,12 @@ import { fileURLToPath } from 'url';
 dbConnection();
 
 const app = express();
+
+cloudinary.config({
+    cloud_name: process.env.CLOUD_NAME,
+    api_key: process.env.CLOUD_API_KEY,
+    api_secret: process.env.CLOUD_API_SECRET,
+});
 
 // Recréer __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -27,6 +36,7 @@ const PORT = process.env.PORT ; // Ajoutez une valeur par défaut si le PORT n'e
 // Middleware
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
+app.use(fileUpload({ useTempFiles: true }));
 // Serve Swagger UI
 app.use('/api-docs-tailleur', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 

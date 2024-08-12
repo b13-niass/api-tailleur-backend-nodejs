@@ -32,7 +32,7 @@ router.route('/measures').get(clientController.getClientMeasures.bind(clientCont
 router.route('/profile').get(clientController.showClientProfile);
 
 router.route('/profile/posts/:id').get(clientController.getPostById);
-router.route('/accueil/posts/:id', ).get(clientController.getPostById);
+router.route('/accueil/posts/:id').get(clientController.getPostById);
 
 router.route('/profile').get(clientController.userProfile);
 

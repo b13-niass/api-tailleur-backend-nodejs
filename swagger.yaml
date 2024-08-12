@@ -104,6 +104,237 @@ paths:
                   message:
                     type: string
                     example: "Une erreur interne s'est produite."
+
+  /api/v1/client/accueil:
+    get:
+      summary: Accueil du client
+      tags:
+        - Utilisateurs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Accueil du client affiché avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Fil D'actualité charger."
+                  status:
+                    type: string
+                    example: "OK ou KO"
+                  posts:
+                    type: object
+                  recentStatus:
+                    type: object
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Une erreur interne s'est produite."
+
+  /api/v1/client/notifications:
+    get:
+      summary: Notifications du client
+      tags:
+        - Utilisateurs
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Notifications du client affichées avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Notifications chargées."
+                  status:
+                    type: string
+                    example: "OK ou KO"
+                  notifications:
+                    type: object
+
+  /api/v1/client/measures:
+    get:
+      summary: Obtenir les mesures du client
+      tags:
+        - Clients
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Mesures du client récupérées avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Mesures récupérées."
+                  status:
+                    type: string
+                    example: "OK ou KO"
+                  measures:
+                    type: object
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Une erreur interne s'est produite."
+
+  /api/v1/client/profile:
+    get:
+      summary: Afficher le profil du client
+      tags:
+        - Clients
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Profil du client affiché avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Profil affiché."
+                  status:
+                    type: string
+                    example: "OK ou KO"
+                  profile:
+                    type: object
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Une erreur interne s'est produite."
+
+  /api/v1/client/profile/posts/{id}:
+    get:
+      summary: Obtenir un post par ID dans le profil du client
+      tags:
+        - Posts
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID du post à récupérer
+      responses:
+        '200':
+          description: Post récupéré avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Post récupéré."
+                  status:
+                    type: string
+                    example: "OK ou KO"
+                  post:
+                    type: object
+        '404':
+          description: Post non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Post non trouvé."
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Une erreur interne s'est produite."
+
+  /api/v1/client/accueil/posts/{id}:
+    get:
+      summary: Obtenir un post par ID dans l'accueil du client
+      tags:
+        - Posts
+      security:
+        - bearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID du post à récupérer
+      responses:
+        '200':
+          description: Post récupéré avec succès.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Post récupéré."
+                  status:
+                    type: string
+                    example: "OK ou KO"
+                  post:
+                    type: object
+        '404':
+          description: Post non trouvé.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Post non trouvé."
+        '500':
+          description: Erreur interne du serveur.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Une erreur interne s'est produite."
+
 components:
   securitySchemes:
     bearerAuth:
