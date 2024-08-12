@@ -182,7 +182,7 @@ paths:
         required: true
         content:
           application/json:
-            schema:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YjljYjcxYTZkY2U3YWU0OWQxZmJmNiIsInJvbGUiOiJ0YWlsbGV1ciIsImlhdCI6MTcyMzQ2ODg1MywiZXhwIjoxNzIzNjQxNjUzfQ.AmCaAUB3dqRodpBiPCmbNmjxgXRNPQWBdPZ3CIdSsAc
+            schema:
               type: object
               properties:
                 content:
@@ -312,8 +312,7 @@ paths:
       description: "Permet à un tailleur d'acheter du crédit."
       tags:
         - Crédit
-      security:
-        - bearerAuth: []
+        
       requestBody:
         required: true
         content:
