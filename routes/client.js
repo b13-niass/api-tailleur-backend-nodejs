@@ -32,7 +32,7 @@ router.route('/measures').get(clientController.getClientMeasures.bind(clientCont
 router.route('/profile').get(clientController.showClientProfile);
 
 router.route('/profile/posts/:id').get(clientController.getPostById);
-router.route('/accueil/posts/:id', ).get(clientController.getPostById);
+router.route('/accueil/posts/:id').get(clientController.getPostById);
 
 router.route('/profile').get(clientController.userProfile);
 
@@ -53,6 +53,9 @@ router.route('/compte')
 
 router.route('/favorites').get(clientController.getAllFavorites);
 
+
+
+
 router.route('/favorites/add').post(clientController.addFavorite);
 
 router.route('/favorites/delete').delete(clientController.deleteFavorite);
@@ -68,6 +71,11 @@ router.route('/like').post(clientController.addLike);
 // Route pour ajouter un dislike
 router.route('/dislike').post(clientController.addDislike);
 
+
+
+
+
+
 // Route pour supprimer un like ou un dislike
 router.route('/unlike').delete(clientController.removeLikeOrDislike);
 
@@ -76,7 +84,6 @@ router.route('/accueil/search').post(clientController.accueilSearch);
 router.route('/posts/comment').post(clientController.ajoutComment).delete(clientController.deleteComment);
 
 router.route('/posts/comment/reponse').post(clientController.reponseComment).delete(clientController.deleteResponseComment);
-
 
 //route pour attribuer note a un compte
 router.route('/note').post(clientController.addNote);
