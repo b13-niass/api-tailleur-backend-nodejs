@@ -998,10 +998,10 @@ class ClientController {
             // .populate('post_id')
             // console.log(notifications);
             // Retourner les notifications trouvées
-            return res.status(200).json(notifications);
+            return res.status(200).json({notifications, message: "Notifications chargées.", status:"OK"});
         } catch (error) {
             console.error('Erreur lors de la récupération des notifications :', error);
-            return res.status(500).json({error: 'Erreur serveur'});
+            return res.status(500).json({message: error.message, status:"KO"});
         }
     }
 

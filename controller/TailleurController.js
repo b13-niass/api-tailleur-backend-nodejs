@@ -7,8 +7,19 @@ import Conversioncredit from '../model/Conversioncredit.js';
 import Compte from "../model/Compte.js";
 import follow from "../model/Follow.js";
 import TissuPost from "../model/TissuPost.js";
+import { v2 as cloudinary } from 'cloudinary';
+import fs from "fs";
 
 class TailleurController {
+
+    constructor() {
+        for (const key of Object.getOwnPropertyNames(Object.getPrototypeOf(this))) {
+            const val = this[key];
+            if (key !== 'constructor' && typeof val === 'function') {
+                this[key] = val.bind(this);
+            }
+        }
+    }
 
     async listMyAllPosts(req, res) {
         try {
@@ -67,10 +78,13 @@ class TailleurController {
             const idCompte = req.id;
             const tailleur = await Tailleur.findOne({compte_id: idCompte});
 
-            const {files, description, categories} = req.body;
+            const {description, categories} = req.body;
+
+            const image = await this.uploadProductImage(req, res,"image");
+            // return res.json(image);
 
             const newStatus = new Status({
-                files: files || 'example.mp4',
+                files: image,
                 description: description || 'Model du jour',
                 duration: 24, // durée automatiquement définie
                 viewsNB: 0,
@@ -432,6 +446,31 @@ class TailleurController {
             });
         }
     }
+
+    async uploadProductImage (req, res, fieldName){
+        if (!req.files) {
+            return res.status(500).json({message: "No File Uploaded", status: "KO"})
+        }
+        const productImage = req.files[`${fieldName}`];
+        if (!productImage.mimetype.startsWith(`${fieldName}`)) {
+            return res.status(500).json({message: "Please Upload Image", status: "KO"})
+        }
+        const maxSize = 1024 * 1024;
+        if (productImage.size > maxSize) {
+            return res.status(500).json({message: "Please upload image smaller 1MB", status: "KO"})
+        }
+        // return res.json(productImage);
+        const result = await cloudinary.uploader.upload(
+            productImage.tempFilePath,
+            {
+                use_filename: true,
+                folder: 'status',
+            }
+        );
+        fs.unlinkSync(productImage.tempFilePath);
+        return productImage.name;
+        // return res.status(200).json({ image: { src: result.secure_url } });
+    };
 }
 
 export default new TailleurController();
